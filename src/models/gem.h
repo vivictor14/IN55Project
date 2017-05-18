@@ -2,9 +2,11 @@
 #define IN55PROJECT_GEM_H
 
 #include <GL/gl.h>
+#include <QtGui/QOpenGLFunctions>
 
-class Gem {
+class Gem : protected QOpenGLFunctions {
 private:
+
     GLfloat topHeight, bottomHeight;
     GLfloat topRadius, middleRadius, bottomRadius;
     GLint topNbPoints, middleNbPoints, bottomNbPoints;
@@ -14,10 +16,12 @@ private:
     void initVertices();
     void initMapping();
     void initColors(GLfloat *color);
+
 public:
+
     Gem(GLfloat topHeight, GLfloat bottomHeight, GLfloat topRadius, GLfloat middleRadius, GLfloat bottomRadius, GLint topNbPoints, GLint middleNbPoints, GLint bottomNbPoints, GLfloat *color);
-    ~Gem();
     void drawShape();
+
 };
 
 
