@@ -1,12 +1,12 @@
-#include <iostream>
 #include <QApplication>
-#include <QTextEdit>
+#include "Windows/displayWindow.h"
+
 
 int main(int argv, char **args) {
     QApplication app(argv, args);
 
-    QTextEdit textEdit;
-    textEdit.show();
+    DisplayWindow win;
+    win.show();
 
     return app.exec();
 }
