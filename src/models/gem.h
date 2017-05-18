@@ -3,6 +3,9 @@
 
 #include <GL/gl.h>
 #include <QtGui/QOpenGLFunctions>
+#include <QtGui/QVector3D>
+#include <QtGui/QOpenGLShaderProgram>
+#include <src/util/transform3D.h>
 
 class Gem : protected QOpenGLFunctions {
 private:
@@ -13,14 +16,18 @@ private:
 
     GLfloat *colors, *vertices, *mapping;
 
-    void initVertices();
+    QOpenGLBuffer buffer;
+    QOpenGLVertexArrayObject vao;
+
+    void initVertices(QVector3D color);
     void initMapping();
-    void initColors(GLfloat *color);
 
 public:
 
-    Gem(GLfloat topHeight, GLfloat bottomHeight, GLfloat topRadius, GLfloat middleRadius, GLfloat bottomRadius, GLint topNbPoints, GLint middleNbPoints, GLint bottomNbPoints, GLfloat *color);
-    void drawShape();
+    Gem(GLfloat topHeight, GLfloat bottomHeight, GLfloat topRadius, GLfloat middleRadius, GLfloat bottomRadius, GLint topNbPoints, GLint middleNbPoints, GLint bottomNbPoints, QVector3D color);
+    ~Gem();
+    void initializeBuffer(QOpenGLShaderProgram *shaderProgram);
+    void drawShape(QOpenGLShaderProgram *shaderProgram, int u_modelToWorld, Transform3D m_transform);
 
 };
 

@@ -1,9 +1,54 @@
 #include <QtGui/QOpenGLVertexArrayObject>
 #include <QtGui/QOpenGLBuffer>
+#include <src/util/vertex.h>
 #include "gem.h"
 
+// Front Verticies
+#define VERTEX_FTR Vertex( QVector3D( 0.5f,  0.5f,  0.5f), QVector3D( 1.0f, 0.0f, 0.0f ) )
+#define VERTEX_FTL Vertex( QVector3D(-0.5f,  0.5f,  0.5f), QVector3D( 0.0f, 1.0f, 0.0f ) )
+#define VERTEX_FBL Vertex( QVector3D(-0.5f, -0.5f,  0.5f), QVector3D( 0.0f, 0.0f, 1.0f ) )
+#define VERTEX_FBR Vertex( QVector3D( 0.5f, -0.5f,  0.5f), QVector3D( 0.0f, 0.0f, 0.0f ) )
+
+// Back Verticies
+#define VERTEX_BTR Vertex( QVector3D( 0.5f,  0.5f, -0.5f), QVector3D( 1.0f, 1.0f, 0.0f ) )
+#define VERTEX_BTL Vertex( QVector3D(-0.5f,  0.5f, -0.5f), QVector3D( 0.0f, 1.0f, 1.0f ) )
+#define VERTEX_BBL Vertex( QVector3D(-0.5f, -0.5f, -0.5f), QVector3D( 1.0f, 0.0f, 1.0f ) )
+#define VERTEX_BBR Vertex( QVector3D( 0.5f, -0.5f, -0.5f), QVector3D( 1.0f, 1.0f, 1.0f ) )
+
+// Create a colored cube
+static const Vertex sg_vertexes[] = {
+        // Face 1 (Front)
+        VERTEX_FTR, VERTEX_FTL, VERTEX_FBL,
+        VERTEX_FBL, VERTEX_FBR, VERTEX_FTR,
+        // Face 2 (Back)
+        VERTEX_BBR, VERTEX_BTL, VERTEX_BTR,
+        VERTEX_BTL, VERTEX_BBR, VERTEX_BBL,
+        // Face 3 (Top)
+        VERTEX_FTR, VERTEX_BTR, VERTEX_BTL,
+        VERTEX_BTL, VERTEX_FTL, VERTEX_FTR,
+        // Face 4 (Bottom)
+        VERTEX_FBR, VERTEX_FBL, VERTEX_BBL,
+        VERTEX_BBL, VERTEX_BBR, VERTEX_FBR,
+        // Face 5 (Left)
+        VERTEX_FBL, VERTEX_FTL, VERTEX_BTL,
+        VERTEX_FBL, VERTEX_BTL, VERTEX_BBL,
+        // Face 6 (Right)
+        VERTEX_FTR, VERTEX_FBR, VERTEX_BBR,
+        VERTEX_BBR, VERTEX_BTR, VERTEX_FTR
+};
+
+#undef VERTEX_BBR
+#undef VERTEX_BBL
+#undef VERTEX_BTL
+#undef VERTEX_BTR
+
+#undef VERTEX_FBR
+#undef VERTEX_FBL
+#undef VERTEX_FTL
+#undef VERTEX_FTR
+
 Gem::Gem(GLfloat topHeight, GLfloat bottomHeight, GLfloat topRadius, GLfloat middleRadius, GLfloat bottomRadius, GLint topNbPoints, GLint middleNbPoints,
-         GLint bottomNbPoints, GLfloat *color) {
+         GLint bottomNbPoints, QVector3D color) {
 
     this->topHeight = topHeight;
     this->bottomHeight = bottomHeight;
@@ -14,34 +59,16 @@ Gem::Gem(GLfloat topHeight, GLfloat bottomHeight, GLfloat topRadius, GLfloat mid
     this->middleNbPoints = middleNbPoints;
     this->bottomNbPoints = bottomNbPoints;
 
-    initVertices();
+    initVertices(color);
     initMapping();
-    initColors(color);
+}
 
-    QOpenGLBuffer vbo;
-
-    GLuint VBO;
-    glGenBuffers(1, &VBO);
-
-    QOpenGLVertexArrayObject vao;
-    vao.create();
-    vao.bind();
-    vbo.create();
-    vbo.setUsagePattern(QOpenGLBuffer::StaticDraw);
-    vbo.bind();
-    vbo.allocate(vertices, sizeof(vertices));
-    vao.release();
-
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
-    glEnableVertexAttribArray(0);
-//    glUseProgram(shaderProgram);
-
+Gem::~Gem() {
+    buffer.destroy();
     vao.destroy();
 }
 
-void Gem::initVertices() {
+void Gem::initVertices(QVector3D color) {
 
 }
 
@@ -49,14 +76,31 @@ void Gem::initMapping() {
 
 }
 
-void Gem::initColors(GLfloat *color) {
+void Gem::initializeBuffer(QOpenGLShaderProgram *shaderProgram) {
 
+    initializeOpenGLFunctions();
+
+    buffer.create();
+    buffer.bind();
+    buffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
+    buffer.allocate(sg_vertexes, sizeof(sg_vertexes));
+
+    vao.create();
+    vao.bind();
+    shaderProgram->enableAttributeArray(0);
+    shaderProgram->enableAttributeArray(1);
+    shaderProgram->setAttributeBuffer(0, GL_FLOAT, Vertex::positionOffset(), Vertex::PositionTupleSize, Vertex::stride());
+    shaderProgram->setAttributeBuffer(1, GL_FLOAT, Vertex::colorOffset(), Vertex::ColorTupleSize, Vertex::stride());
+
+    vao.release();
+    buffer.release();
 }
 
-void Gem::drawShape() {
-//    glDrawElements(GL_TRIANGLE_FAN, 2 * n + 2, GL_UNSIGNED_INT, g_TabPositionsStar );
-//    glDrawElements(GL_TRIANGLE_FAN, 2 * n + 2, GL_UNSIGNED_INT, g_TabPositionsStar2 );
-//    glDrawElements(GL_TRIANGLE_STRIP, 4 * n + 2, GL_UNSIGNED_INT, g_TabPositionsStar3);
+void Gem::drawShape(QOpenGLShaderProgram *shaderProgram, int u_modelToWorld, Transform3D m_transform) {
+
+    vao.bind();
+    shaderProgram->setUniformValue(u_modelToWorld, m_transform.toMatrix());
+    glDrawArrays(GL_TRIANGLES, 0, sizeof(sg_vertexes) / sizeof(sg_vertexes[0]));
+    vao.release();
+
 }
-
-

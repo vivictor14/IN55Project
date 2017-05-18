@@ -9,12 +9,14 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 set(CMAKE_VERBOSE_MAKEFILE ON)
 set(APP_MODELS src/models)
-set(APP_WINDOWS src/windows)
+set(APP_WIDGETS src/widgets)
 set(APP_UTIL src/util)
+set(APP_CONTROLS src/controls)
 
 include_directories( ${APP_MODELS} )
-include_directories( ${APP_WINDOWS} )
+include_directories( ${APP_WIDGETS} )
 include_directories( ${APP_UTIL} )
+include_directories( ${APP_CONTROLS} )
 
 find_package( Qt5Widgets REQUIRED )
 find_package( Qt5OpenGL )
@@ -25,9 +27,15 @@ find_package( OpenGL )
 set(SOURCE_FILES src/main.cpp
         ${APP_MODELS}/gem.h
         ${APP_MODELS}/gem.cpp
-        ${APP_WINDOWS}/displayWindow.h
-        ${APP_WINDOWS}/displayWindow.cpp
-        ${APP_UTIL}/vertex.h)
+        ${APP_WIDGETS}/displayWidget.h
+        ${APP_WIDGETS}/displayWidget.cpp
+        ${APP_UTIL}/vertex.h
+        ${APP_UTIL}/transform3D.h
+        ${APP_UTIL}/transform3D.cpp
+        ${APP_CONTROLS}/camera3D.h
+        ${APP_CONTROLS}/camera3D.cpp
+        ${APP_CONTROLS}/input.h
+        ${APP_CONTROLS}/input.cpp)
 
 add_executable(IN55Project ${SOURCE_FILES})
 
