@@ -1,7 +1,7 @@
 #include "displayWidget.h"
 
 DisplayWidget::DisplayWidget() {
-    setFocus();
+    setFocusPolicy( Qt::StrongFocus );
     m_transform.translate(0.0f, 0.0f, -5.0f);
     gem = new Gem(2, 5, 2, 3, 2, 8, 8, 1, QVector3D(1.0f, 0.0f, 0.0f));
 }
@@ -71,7 +71,7 @@ void DisplayWidget::update() {
 
         // Handle translations
         QVector3D translation;
-        if (Input::keyPressed(Qt::Key_W))
+        if (Input::keyPressed(Qt::Key_Z))
         {
             translation += m_camera.forward();
         }
@@ -79,7 +79,7 @@ void DisplayWidget::update() {
         {
             translation -= m_camera.forward();
         }
-        if (Input::keyPressed(Qt::Key_A))
+        if (Input::keyPressed(Qt::Key_Q))
         {
             translation -= m_camera.right();
         }
@@ -87,7 +87,7 @@ void DisplayWidget::update() {
         {
             translation += m_camera.right();
         }
-        if (Input::keyPressed(Qt::Key_Q))
+        if (Input::keyPressed(Qt::Key_A))
         {
             translation -= m_camera.up();
         }
