@@ -48,7 +48,7 @@ static const Vertex sg_vertexes[] = {
 #undef VERTEX_FTR
 
 Gem::Gem(GLfloat topHeight, GLfloat bottomHeight, GLfloat topRadius, GLfloat middleRadius, GLfloat bottomRadius, GLint topNbPoints, GLint middleNbPoints,
-         GLint bottomNbPoints, QVector3D color) {
+         GLint bottomNbPoints, GLint topComplexity, GLint bottomComplexity, QVector3D color) {
 
     this->topHeight = topHeight;
     this->bottomHeight = bottomHeight;
@@ -58,6 +58,8 @@ Gem::Gem(GLfloat topHeight, GLfloat bottomHeight, GLfloat topRadius, GLfloat mid
     this->topNbPoints = topNbPoints;
     this->middleNbPoints = middleNbPoints;
     this->bottomNbPoints = bottomNbPoints;
+    this->topComplexity = topComplexity;
+    this->bottomComplexity = bottomComplexity;
 
     initVertices(color);
     initMapping();
@@ -69,6 +71,58 @@ Gem::~Gem() {
 }
 
 void Gem::initVertices(QVector3D color) {
+    topVertices = new Vertex [ topComplexity * topNbPoints ];
+    middleVertices = new Vertex [ middleNbPoints ];
+    bottomVertices = new Vertex [ bottomComplexity * bottomNbPoints ];
+
+    double angle = 2.0f * M_PI / middleNbPoints;
+    for(int i = 0; i < middleNbPoints; i++) {
+        float x = (float) cos(i * angle) * middleRadius;
+        float z = (float) sin(i * angle) * middleRadius;
+        middleVertices[i] = Vertex( QVector3D(x, 0, z), color);
+    }
+    calculateInnerMiddleRadius();
+
+    initFaceVertices(topVertices, topHeight, topRadius, topNbPoints, topComplexity, color);
+    initFaceVertices(bottomVertices, bottomHeight, bottomRadius, bottomNbPoints, bottomComplexity, color);
+
+}
+
+void Gem::calculateInnerMiddleRadius() {
+
+    QVector3D A = middleVertices[0].position();
+    QVector3D B = middleVertices[1].position();
+    QVector3D M = QVector3D((A.x() + B.x()) / 2, (A.y() + B.y()) / 2, (A.z() + B.z()) / 2);
+    innerMiddleRadius = (GLfloat) sqrt(pow(M.x(), 2) + pow(M.y(), 2) + pow(M.z(), 2));
+
+}
+
+void Gem::initFaceVertices(Vertex *vertices, GLfloat height, GLfloat radius, GLint nbPoints, GLint complexity, QVector3D color) {
+
+    double angle = 2.0f * M_PI / nbPoints;
+    double offset;
+
+    for(int i = 0; i < complexity; i++) {
+
+        if((complexity - i)%2 != 0) {
+            offset = angle / 2;
+        }
+        else {
+            offset = 0;
+        }
+
+        for(int j = 0; j < nbPoints; j++) {
+
+            float x, y, z;
+            float complexityCircleRadius = radius + i * ((innerMiddleRadius - radius) / complexity);
+            x = (float) cos(i * angle + offset) * complexityCircleRadius;
+            z = (float) sin(i * angle + offset) * complexityCircleRadius;
+            y = height - i * (height / complexity);
+            vertices[(i * nbPoints) + j] = Vertex(QVector3D(x, y, z), color);
+
+        }
+
+    }
 
 }
 
