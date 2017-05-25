@@ -2,8 +2,9 @@
 
 DisplayWidget::DisplayWidget() {
     setFocusPolicy( Qt::StrongFocus );
-    m_transform.translate(0.0f, 0.0f, -5.0f);
-    gem = new Gem(2, 4, 4, 5, 2, 8, 8, 5, 1, 1, QVector3D(1.0f, 0.0f, 0.0f));
+    m_camera.rotate(-40, 1, 0, 0);
+    m_transform.translate(0, -20, -20);
+    gem = new Gem(2, -4, 4, 5, 2, 8, 8, 1, 3, 2, QVector3D(0.0f, 1.0f, 1.0f));
 }
 
 DisplayWidget::~DisplayWidget() {
@@ -17,7 +18,8 @@ void DisplayWidget::initializeGL() {
     initializeOpenGLFunctions();
     connect(this, SIGNAL(frameSwapped()), this, SLOT(update()));
 
-    glEnable(GL_CULL_FACE);
+//    glEnable(GL_CULL_FACE);
+    glEnable (GL_POINT);
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
     shaderProgram = new QOpenGLShaderProgram();
@@ -100,7 +102,7 @@ void DisplayWidget::update() {
     }
 
     // Update instance information
-    m_transform.rotate(1.0f, QVector3D(0.4f, 0.3f, 0.3f));
+//    m_transform.rotate(1.0f, QVector3D(0.4f, 0.3f, 0.3f));
 
     // Schedule a redraw
     QOpenGLWidget::update();

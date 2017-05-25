@@ -20,13 +20,15 @@ private:
     QOpenGLBuffer *vbo;
     QOpenGLVertexArrayObject *vao;
 
+    int *length;
+
     void calculateInnerMiddleRadius();
     void initVertices(QVector3D color);
     void initMapping();
     Vertex *initFaceVertices(GLfloat height, GLfloat radius, GLint nbPoints, GLint Complexity, QVector3D color);
-    Vertex *initFanFaceMapping(Vertex *vertices, GLint nbPoints, GLint complexity);
-    Vertex *initStripFaceMapping(Vertex *vertices, GLint nbPoints, GLint complexity);
-    Vertex *initTrianglesFaceMapping(Vertex *vertices, GLint nbPoints, GLint complexity);
+    Vertex *initFanFaceMapping(int *length, Vertex *vertices, GLint nbPoints, GLint complexity);
+    Vertex *initStripFaceMapping(int *length, Vertex *vertices, GLint nbPoints, GLint complexity);
+    Vertex *initTrianglesFaceMapping(int *length, Vertex *vertices, GLint nbPoints, GLint complexity);
 
 public:
 
