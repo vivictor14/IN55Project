@@ -15,14 +15,18 @@ private:
     GLint topNbPoints, middleNbPoints, bottomNbPoints, topComplexity, bottomComplexity;
 
     Vertex *topVertices, *middleVertices, *bottomVertices;
+    Vertex **drawVertices;
 
-    QOpenGLBuffer buffer;
-    QOpenGLVertexArrayObject vao;
+    QOpenGLBuffer *vbo;
+    QOpenGLVertexArrayObject *vao;
 
     void calculateInnerMiddleRadius();
     void initVertices(QVector3D color);
     void initMapping();
-    void initFaceVertices(Vertex *vertices, GLfloat height, GLfloat radius, GLint nbPoints, GLint Complexity, QVector3D color);
+    Vertex *initFaceVertices(GLfloat height, GLfloat radius, GLint nbPoints, GLint Complexity, QVector3D color);
+    Vertex *initFanFaceMapping(Vertex *vertices, GLint nbPoints, GLint complexity);
+    Vertex *initStripFaceMapping(Vertex *vertices, GLint nbPoints, GLint complexity);
+    Vertex *initTrianglesFaceMapping(Vertex *vertices, GLint nbPoints, GLint complexity);
 
 public:
 

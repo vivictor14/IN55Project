@@ -3,7 +3,7 @@
 DisplayWidget::DisplayWidget() {
     setFocusPolicy( Qt::StrongFocus );
     m_transform.translate(0.0f, 0.0f, -5.0f);
-    gem = new Gem(2, 5, 2, 3, 2, 8, 8, 1, 1, 1, QVector3D(1.0f, 0.0f, 0.0f));
+    gem = new Gem(2, 4, 4, 5, 2, 8, 8, 5, 1, 1, QVector3D(1.0f, 0.0f, 0.0f));
 }
 
 DisplayWidget::~DisplayWidget() {
