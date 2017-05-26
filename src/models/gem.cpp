@@ -91,11 +91,7 @@ Vertex *Gem::initFaceVertices(GLfloat height, GLfloat radius, GLint nbPoints, GL
 
         for (int i = 0; i < complexity - 1; i++) {
 
-            if ((complexity - i) % 2 != 0) {
-                offset = angle / 2;
-            } else {
-                offset = 0;
-            }
+            offset = (i + 1) * angle / 2;
 
             for (int j = 0; j < middleNbPoints; j++) {
 
@@ -104,7 +100,7 @@ Vertex *Gem::initFaceVertices(GLfloat height, GLfloat radius, GLint nbPoints, GL
                 x = (float) cos(j * angle + offset) * complexityCircleRadius;
                 z = (float) sin(j * angle + offset) * complexityCircleRadius;
                 y = (i + 1) * (height / complexity);
-                vertices[(i * nbPoints) + j + 1] = Vertex(QVector3D(x, y, z), color);
+                vertices[(i * middleNbPoints) + j + 1] = Vertex(QVector3D(x, y, z), color);
 
             }
 
@@ -146,14 +142,22 @@ Vertex *Gem::initFanFaceMapping(int *length, Vertex *vertices, GLint nbPoints, G
         }
     }
     else {
-        *length = (complexity - 1) * middleNbPoints + 1;
+        *length = middleNbPoints + 2;
 
         fanVertices = new Vertex[middleNbPoints + 2];
         fanVertices[0] = vertices[0];
-        for(int i = 0; i < middleNbPoints; i++) {
-            fanVertices[i + 1] = vertices[*length - middleNbPoints + i];
+        if(complexity > 1) {
+            for (int i = 0; i < middleNbPoints; i++) {
+                fanVertices[i + 1] = vertices[(complexity - 2) * middleNbPoints + 1 + i];
+            }
+            fanVertices[middleNbPoints + 1] = vertices[(complexity - 2) * middleNbPoints + 1];
         }
-        fanVertices[middleNbPoints + 1] = vertices[*length - middleNbPoints];
+        else {
+            for (int i = 0; i < middleNbPoints; i++) {
+                fanVertices[i + 1] = middleVertices[i];
+            }
+            fanVertices[middleNbPoints + 1] = middleVertices[0];
+        }
     }
 
     return fanVertices;
@@ -168,18 +172,51 @@ Vertex *Gem::initStripFaceMapping(int *length, Vertex *vertices, GLint nbPoints,
     if(complexity > 1) {
         if (nbPoints > 1) {
 
-            *length = (complexity - 1) * 2 * nbPoints + 2;
-            stripVertices = new Vertex[(complexity - 1) * 2 * nbPoints + 2];
+            *length = (complexity - 1) * (2 * nbPoints + 1) + 1;
+            stripVertices = new Vertex[*length];
 
-            for (int i = 0; i < (complexity - 1) * nbPoints; i++) {
+            for(int i = 0; i < complexity - 1; i++) {
 
-                stripVertices[2 * i] = vertices[i];
-                stripVertices[2 * i + 1] = vertices[nbPoints + i];
+                for(int j = 0; j < nbPoints; j++) {
+
+                    stripVertices[i * (2 * nbPoints + 1) + 2 * j] = vertices[i * nbPoints + j];
+                    stripVertices[i * (2 * nbPoints + 1) + 2 * j + 1] = vertices[(i + 1) * nbPoints + j];
+
+                }
+
+                stripVertices[2 * nbPoints * (i + 1) + i] = vertices[i * nbPoints];
 
             }
-            stripVertices[(complexity - 1) * 2 * nbPoints] = vertices[0];
-            stripVertices[(complexity - 1) * 2 * nbPoints + 1] = vertices[nbPoints];
-        } else {
+
+            stripVertices[(complexity - 1) * (2 * nbPoints + 1)] = vertices[(complexity - 1) * nbPoints];
+        }
+
+        else {
+
+            *length = (complexity - 1) * (2 * middleNbPoints + 1) + 1;
+            stripVertices = new Vertex[*length];
+
+            for(int i = 0; i < middleNbPoints; i++) {
+
+                stripVertices[2 * i] = middleVertices[i];
+                stripVertices[2 * i + 1] = vertices[i + 1];
+
+            }
+            stripVertices[2 * middleNbPoints] = middleVertices[0];
+
+            for(int i = 1; i < complexity - 1; i++) {
+                for(int j = 0; j < middleNbPoints; j++) {
+
+                    stripVertices[i * (2 * middleNbPoints + 1) + 2 * j] = vertices[(i - 1) * middleNbPoints + 1 + j];
+                    stripVertices[i * (2 * middleNbPoints + 1) +  2 * j + 1] = vertices[i * middleNbPoints + 1 + j];
+
+                }
+
+                stripVertices[(i + 1) * (2 * middleNbPoints + 1) - 1] = vertices[(i - 1) * middleNbPoints + 1];
+
+            }
+
+            stripVertices[(complexity - 1) * (2 * middleNbPoints + 1)] = vertices[(complexity - 2) * middleNbPoints + 1];
 
         }
     }
@@ -225,99 +262,99 @@ void Gem::initializeBuffer(QOpenGLShaderProgram *shaderProgram) {
     vbo = new QOpenGLBuffer[6];
     vao = new QOpenGLVertexArrayObject[6];
 
-    vbo[0].create();
-    vbo[0].bind();
-    vbo[0].setUsagePattern(QOpenGLBuffer::StaticDraw);
-    vbo[0].allocate(topVertices, topComplexity * topNbPoints * sizeof(Vertex));
-
-    vao[0].create();
-    vao[0].bind();
-    shaderProgram->enableAttributeArray(0);
-    shaderProgram->enableAttributeArray(1);
-    shaderProgram->setAttributeBuffer(0, GL_FLOAT, Vertex::positionOffset(), Vertex::PositionTupleSize, Vertex::stride());
-    shaderProgram->setAttributeBuffer(1, GL_FLOAT, Vertex::colorOffset(), Vertex::ColorTupleSize, Vertex::stride());
-
-    vao[0].release();
-    vbo[0].release();
-
-    vbo[1].create();
-    vbo[1].bind();
-    vbo[1].setUsagePattern(QOpenGLBuffer::StaticDraw);
-    vbo[1].allocate(bottomVertices, ((bottomComplexity - 1) * middleNbPoints + 1) * sizeof(Vertex));
-
-    vao[1].create();
-    vao[1].bind();
-    shaderProgram->enableAttributeArray(0);
-    shaderProgram->enableAttributeArray(1);
-    shaderProgram->setAttributeBuffer(0, GL_FLOAT, Vertex::positionOffset(), Vertex::PositionTupleSize, Vertex::stride());
-    shaderProgram->setAttributeBuffer(1, GL_FLOAT, Vertex::colorOffset(), Vertex::ColorTupleSize, Vertex::stride());
-
-    vao[1].release();
-    vbo[1].release();
-
-    vbo[2].create();
-    vbo[2].bind();
-    vbo[2].setUsagePattern(QOpenGLBuffer::StaticDraw);
-    vbo[2].allocate(middleVertices, middleNbPoints * sizeof(Vertex));
-
-    vao[2].create();
-    vao[2].bind();
-    shaderProgram->enableAttributeArray(0);
-    shaderProgram->enableAttributeArray(1);
-    shaderProgram->setAttributeBuffer(0, GL_FLOAT, Vertex::positionOffset(), Vertex::PositionTupleSize, Vertex::stride());
-    shaderProgram->setAttributeBuffer(1, GL_FLOAT, Vertex::colorOffset(), Vertex::ColorTupleSize, Vertex::stride());
-
-    vao[2].release();
-    vbo[2].release();
-
-
-//    for(int i = 0; i < 6; i++) {
-//        vbo[i].create();
-//        vbo[i].bind();
-//        vbo[i].setUsagePattern(QOpenGLBuffer::StaticDraw);
-//        vbo[i].allocate(drawVertices[i], length[i] * sizeof(Vertex));
+//    vbo[0].create();
+//    vbo[0].bind();
+//    vbo[0].setUsagePattern(QOpenGLBuffer::StaticDraw);
+//    vbo[0].allocate(topVertices, topComplexity * topNbPoints * sizeof(Vertex));
 //
-//        vao[i].create();
-//        vao[i].bind();
-//        shaderProgram->enableAttributeArray(0);
-//        shaderProgram->enableAttributeArray(1);
-//        shaderProgram->setAttributeBuffer(0, GL_FLOAT, Vertex::positionOffset(), Vertex::PositionTupleSize, Vertex::stride());
-//        shaderProgram->setAttributeBuffer(1, GL_FLOAT, Vertex::colorOffset(), Vertex::ColorTupleSize, Vertex::stride());
+//    vao[0].create();
+//    vao[0].bind();
+//    shaderProgram->enableAttributeArray(0);
+//    shaderProgram->enableAttributeArray(1);
+//    shaderProgram->setAttributeBuffer(0, GL_FLOAT, Vertex::positionOffset(), Vertex::PositionTupleSize, Vertex::stride());
+//    shaderProgram->setAttributeBuffer(1, GL_FLOAT, Vertex::colorOffset(), Vertex::ColorTupleSize, Vertex::stride());
 //
-//        vao[i].release();
-//        vbo[i].release();
-//    }
+//    vao[0].release();
+//    vbo[0].release();
+//
+//    vbo[1].create();
+//    vbo[1].bind();
+//    vbo[1].setUsagePattern(QOpenGLBuffer::StaticDraw);
+//    vbo[1].allocate(bottomVertices, ((bottomComplexity - 1) * middleNbPoints + 1) * sizeof(Vertex));
+//
+//    vao[1].create();
+//    vao[1].bind();
+//    shaderProgram->enableAttributeArray(0);
+//    shaderProgram->enableAttributeArray(1);
+//    shaderProgram->setAttributeBuffer(0, GL_FLOAT, Vertex::positionOffset(), Vertex::PositionTupleSize, Vertex::stride());
+//    shaderProgram->setAttributeBuffer(1, GL_FLOAT, Vertex::colorOffset(), Vertex::ColorTupleSize, Vertex::stride());
+//
+//    vao[1].release();
+//    vbo[1].release();
+//
+//    vbo[2].create();
+//    vbo[2].bind();
+//    vbo[2].setUsagePattern(QOpenGLBuffer::StaticDraw);
+//    vbo[2].allocate(middleVertices, middleNbPoints * sizeof(Vertex));
+//
+//    vao[2].create();
+//    vao[2].bind();
+//    shaderProgram->enableAttributeArray(0);
+//    shaderProgram->enableAttributeArray(1);
+//    shaderProgram->setAttributeBuffer(0, GL_FLOAT, Vertex::positionOffset(), Vertex::PositionTupleSize, Vertex::stride());
+//    shaderProgram->setAttributeBuffer(1, GL_FLOAT, Vertex::colorOffset(), Vertex::ColorTupleSize, Vertex::stride());
+//
+//    vao[2].release();
+//    vbo[2].release();
+
+
+    for(int i = 0; i < 6; i++) {
+        vbo[i].create();
+        vbo[i].bind();
+        vbo[i].setUsagePattern(QOpenGLBuffer::StaticDraw);
+        vbo[i].allocate(drawVertices[i], length[i] * sizeof(Vertex));
+
+        vao[i].create();
+        vao[i].bind();
+        shaderProgram->enableAttributeArray(0);
+        shaderProgram->enableAttributeArray(1);
+        shaderProgram->setAttributeBuffer(0, GL_FLOAT, Vertex::positionOffset(), Vertex::PositionTupleSize, Vertex::stride());
+        shaderProgram->setAttributeBuffer(1, GL_FLOAT, Vertex::colorOffset(), Vertex::ColorTupleSize, Vertex::stride());
+
+        vao[i].release();
+        vbo[i].release();
+    }
 
 }
 
 void Gem::drawShape(QOpenGLShaderProgram *shaderProgram, int u_modelToWorld, Transform3D m_transform) {
 
-//    for(int i = 0; i < 6; i++) {
-//        vao[i].bind();
-//        shaderProgram->setUniformValue(u_modelToWorld, m_transform.toMatrix());
-//        if(i%3 == 0) {
-//            glDrawArrays(GL_TRIANGLE_FAN, 0, length[i]);
-//        }
-//        else if(i%3 == 1){
-//            glDrawArrays(GL_TRIANGLE_STRIP, 0, length[i]);
-//        }
+    for(int i = 0; i < 6; i++) {
+        vao[i].bind();
+        shaderProgram->setUniformValue(u_modelToWorld, m_transform.toMatrix());
+        if(i%3 == 0) {
+            glDrawArrays(GL_TRIANGLE_FAN, 0, length[i]);
+        }
+        else if(i%3 == 1){
+            glDrawArrays(GL_TRIANGLE_STRIP, 0, length[i]);
+        }
 //        else {
 //            glDrawArrays(GL_TRIANGLES, 0, length[i]);
 //        }
-//        vao[i].release();
-//    }
+        vao[i].release();
+    }
 
-    vao[0].bind();
-    shaderProgram->setUniformValue(u_modelToWorld, m_transform.toMatrix());
-    glDrawArrays(GL_POINTS, 0, topComplexity * topNbPoints);
-    vao[0].release();
-    vao[1].bind();
-    shaderProgram->setUniformValue(u_modelToWorld, m_transform.toMatrix());
-    glDrawArrays(GL_POINTS, 0, (bottomComplexity - 1) * middleNbPoints + 1);
-    vao[1].release();
-    vao[2].bind();
-    shaderProgram->setUniformValue(u_modelToWorld, m_transform.toMatrix());
-    glDrawArrays(GL_POINTS, 0, middleNbPoints);
-    vao[2].release();
+//    vao[0].bind();
+//    shaderProgram->setUniformValue(u_modelToWorld, m_transform.toMatrix());
+//    glDrawArrays(GL_POINTS, 0, topComplexity * topNbPoints);
+//    vao[0].release();
+//    vao[1].bind();
+//    shaderProgram->setUniformValue(u_modelToWorld, m_transform.toMatrix());
+//    glDrawArrays(GL_POINTS, 0, (bottomComplexity - 1) * middleNbPoints + 1);
+//    vao[1].release();
+//    vao[2].bind();
+//    shaderProgram->setUniformValue(u_modelToWorld, m_transform.toMatrix());
+//    glDrawArrays(GL_POINTS, 0, middleNbPoints);
+//    vao[2].release();
 
 }

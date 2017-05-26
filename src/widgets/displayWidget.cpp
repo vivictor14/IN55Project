@@ -4,7 +4,7 @@ DisplayWidget::DisplayWidget() {
     setFocusPolicy( Qt::StrongFocus );
     m_camera.rotate(-40, 1, 0, 0);
     m_transform.translate(0, -20, -20);
-    gem = new Gem(2, -4, 4, 5, 2, 8, 8, 1, 3, 2, QVector3D(0.0f, 1.0f, 1.0f));
+    gem = new Gem(2, -4, 4, 5, 2, 8, 8, 1, 4, 3, QVector3D(0.0f, 1.0f, 1.0f));
 }
 
 DisplayWidget::~DisplayWidget() {
