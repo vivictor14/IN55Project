@@ -119,11 +119,11 @@ void Gem::initMapping() {
 
     drawVertices[0] = initFanFaceMapping(&length[0], bottomVertices, bottomNbPoints, bottomComplexity);
     drawVertices[1] = initStripFaceMapping(&length[1], bottomVertices, bottomNbPoints, bottomComplexity);
-    drawVertices[2] = initTrianglesFaceMapping(&length[2], bottomVertices, bottomNbPoints, bottomComplexity);
+    drawVertices[2] = initTrianglesFaceMapping(&length[2], bottomVertices, bottomNbPoints, false);
 
     drawVertices[3] = initFanFaceMapping(&length[3], topVertices, topNbPoints, topComplexity);
     drawVertices[4] = initStripFaceMapping(&length[4], topVertices, topNbPoints, topComplexity);
-    drawVertices[5] = initTrianglesFaceMapping(&length[5], topVertices, topNbPoints, topComplexity);
+    drawVertices[5] = initTrianglesFaceMapping(&length[5], topVertices, topNbPoints, true);
 
 }
 
@@ -225,28 +225,42 @@ Vertex *Gem::initStripFaceMapping(int *length, Vertex *vertices, GLint nbPoints,
 
 }
 
-Vertex *Gem::initTrianglesFaceMapping(int *length, Vertex *vertices, GLint nbPoints, GLint complexity) {
+Vertex *Gem::initTrianglesFaceMapping(int *length, Vertex *vertices, GLint nbPoints, bool clockwise) {
 
     Vertex *trianglesVertices = new Vertex[0];
 
     if(nbPoints > 1) {
 
         *length = 3 * nbPoints + 3 * middleNbPoints;
-        trianglesVertices = new Vertex[3 * nbPoints + 3 * middleNbPoints];
+        trianglesVertices = new Vertex[*length];
 
         for(int i = 0; i < nbPoints; i++) {
 
-            trianglesVertices[3 * i] = vertices[(complexity - 1) * nbPoints + i];
-            trianglesVertices[3 * i + 1] = vertices[(complexity - 1) * nbPoints + i + 1];
-            trianglesVertices[3 * i + 2] = middleVertices[i * middleNbPoints / nbPoints];
+            if(!clockwise){
+                trianglesVertices[3 * i + 1] = vertices[i];
+                trianglesVertices[3 * i] = vertices[(i + 1) % nbPoints];
+                trianglesVertices[3 * i + 2] = middleVertices[(i + 1) % nbPoints * middleNbPoints / nbPoints];
+            }
+            else {
+                trianglesVertices[3 * i] = vertices[i];
+                trianglesVertices[3 * i + 1] = vertices[(i + 1) % nbPoints];
+                trianglesVertices[3 * i + 2] = middleVertices[(i + 1) % nbPoints * middleNbPoints / nbPoints];
+            }
 
         }
 
         for(int i = 0; i < middleNbPoints; i++) {
 
-            trianglesVertices[3 * nbPoints + 3 * i] = middleVertices[i];
-            trianglesVertices[3 * nbPoints + 3 * i + 1] = middleVertices[i + 1];
-            trianglesVertices[3 * nbPoints + 3 * i + 2] = vertices[(complexity - 1) * nbPoints + i * nbPoints / middleNbPoints];
+            if(!clockwise){
+                trianglesVertices[3 * nbPoints + 3 * i] = middleVertices[i];
+                trianglesVertices[3 * nbPoints + 3 * i + 1] = middleVertices[(i + 1) % middleNbPoints];
+                trianglesVertices[3 * nbPoints + 3 * i + 2] = vertices[i * nbPoints / middleNbPoints];
+            }
+            else {
+                trianglesVertices[3 * nbPoints + 3 * i + 1] = middleVertices[i];
+                trianglesVertices[3 * nbPoints + 3 * i] = middleVertices[(i + 1) % middleNbPoints];
+                trianglesVertices[3 * nbPoints + 3 * i + 2] = vertices[i * nbPoints / middleNbPoints];
+            }
 
         }
     }
@@ -333,14 +347,14 @@ void Gem::drawShape(QOpenGLShaderProgram *shaderProgram, int u_modelToWorld, Tra
         vao[i].bind();
         shaderProgram->setUniformValue(u_modelToWorld, m_transform.toMatrix());
         if(i%3 == 0) {
-            glDrawArrays(GL_TRIANGLE_FAN, 0, length[i]);
+           //glDrawArrays(GL_TRIANGLE_FAN, 0, length[i]);
         }
         else if(i%3 == 1){
-            glDrawArrays(GL_TRIANGLE_STRIP, 0, length[i]);
+           //glDrawArrays(GL_TRIANGLE_STRIP, 0, length[i]);
         }
-//        else {
-//            glDrawArrays(GL_TRIANGLES, 0, length[i]);
-//        }
+        else {
+            glDrawArrays(GL_TRIANGLES, 0, length[i]);
+        }
         vao[i].release();
     }
 
