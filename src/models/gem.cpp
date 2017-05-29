@@ -1,6 +1,3 @@
-#include <QtGui/QOpenGLVertexArrayObject>
-#include <QtGui/QOpenGLBuffer>
-#include <src/util/vertex.h>
 #include "gem.h"
 
 Gem::Gem(GLfloat topHeight, GLfloat bottomHeight, GLfloat topRadius, GLfloat middleRadius, GLfloat bottomRadius, GLint topNbPoints, GLint middleNbPoints,
@@ -71,7 +68,7 @@ Vertex *Gem::initFaceVertices(GLfloat height, GLfloat radius, GLint nbPoints, GL
             for (int j = 0; j < nbPoints; j++) {
 
                 float x, y, z;
-                float complexityCircleRadius = radius + (complexity - 1 - i) * ((innerMiddleRadius - radius) / complexity);
+                float complexityCircleRadius = radius + (complexity - 1 - i) * ((middleRadius - radius) / complexity);
                 x = (float) cos(j * angle + offset) * complexityCircleRadius;
                 z = (float) sin(j * angle + offset) * complexityCircleRadius;
                 y = (i + 1) * (height / complexity);
@@ -96,7 +93,7 @@ Vertex *Gem::initFaceVertices(GLfloat height, GLfloat radius, GLint nbPoints, GL
             for (int j = 0; j < middleNbPoints; j++) {
 
                 float x, y, z;
-                float complexityCircleRadius = innerMiddleRadius - (i + 1) * (innerMiddleRadius / complexity);
+                float complexityCircleRadius = middleRadius - (i + 1) * (middleRadius / complexity);
                 x = (float) cos(j * angle + offset) * complexityCircleRadius;
                 z = (float) sin(j * angle + offset) * complexityCircleRadius;
                 y = (i + 1) * (height / complexity);
@@ -117,17 +114,17 @@ void Gem::initMapping() {
     drawVertices = new Vertex*[6];
     length = new int[6];
 
-    drawVertices[0] = initFanFaceMapping(&length[0], bottomVertices, bottomNbPoints, bottomComplexity);
-    drawVertices[1] = initStripFaceMapping(&length[1], bottomVertices, bottomNbPoints, bottomComplexity);
+    drawVertices[0] = initFanFaceMapping(&length[0], bottomVertices, bottomNbPoints, bottomComplexity, false);
+    drawVertices[1] = initStripFaceMapping(&length[1], bottomVertices, bottomNbPoints, bottomComplexity, true);
     drawVertices[2] = initTrianglesFaceMapping(&length[2], bottomVertices, bottomNbPoints, bottomComplexity);
 
-    drawVertices[3] = initFanFaceMapping(&length[3], topVertices, topNbPoints, topComplexity);
-    drawVertices[4] = initStripFaceMapping(&length[4], topVertices, topNbPoints, topComplexity);
+    drawVertices[3] = initFanFaceMapping(&length[3], topVertices, topNbPoints, topComplexity, true);
+    drawVertices[4] = initStripFaceMapping(&length[4], topVertices, topNbPoints, topComplexity, false);
     drawVertices[5] = initTrianglesFaceMapping(&length[5], topVertices, topNbPoints, topComplexity);
 
 }
 
-Vertex *Gem::initFanFaceMapping(int *length, Vertex *vertices, GLint nbPoints, GLint complexity) {
+Vertex *Gem::initFanFaceMapping(int *length, Vertex *vertices, GLint nbPoints, GLint complexity, bool clockWise) {
 
     Vertex *fanVertices;
 
@@ -137,7 +134,12 @@ Vertex *Gem::initFanFaceMapping(int *length, Vertex *vertices, GLint nbPoints, G
 
         for(int i = 0; i < nbPoints; i++) {
 
-            fanVertices[i] = vertices[i];
+            if(clockWise) {
+                fanVertices[i] = vertices[(complexity * nbPoints - 1) - i];
+            }
+            else {
+                fanVertices[i] = vertices[(complexity - 1) * nbPoints + i];
+            }
 
         }
     }
@@ -147,16 +149,24 @@ Vertex *Gem::initFanFaceMapping(int *length, Vertex *vertices, GLint nbPoints, G
         fanVertices = new Vertex[middleNbPoints + 2];
         fanVertices[0] = vertices[0];
         if(complexity > 1) {
-            for (int i = 0; i < middleNbPoints; i++) {
-                fanVertices[i + 1] = vertices[(complexity - 2) * middleNbPoints + 1 + i];
+            for (int i = 0; i <= middleNbPoints; i++) {
+                if(clockWise) {
+                    fanVertices[i + 1] = vertices[(complexity - 1) * middleNbPoints - i % middleNbPoints];
+                }
+                else {
+                    fanVertices[i + 1] = vertices[(complexity - 2) * middleNbPoints + 1 + i % middleNbPoints];
+                }
             }
-            fanVertices[middleNbPoints + 1] = vertices[(complexity - 2) * middleNbPoints + 1];
         }
         else {
-            for (int i = 0; i < middleNbPoints; i++) {
-                fanVertices[i + 1] = middleVertices[i];
+            for (int i = 0; i <= middleNbPoints; i++) {
+                if(clockWise) {
+                    fanVertices[i + 1] = middleVertices[(middleNbPoints - 1) - i % middleNbPoints];
+                }
+                else {
+                    fanVertices[i + 1] = middleVertices[i % middleNbPoints];
+                }
             }
-            fanVertices[middleNbPoints + 1] = middleVertices[0];
         }
     }
 
@@ -164,7 +174,7 @@ Vertex *Gem::initFanFaceMapping(int *length, Vertex *vertices, GLint nbPoints, G
 
 }
 
-Vertex *Gem::initStripFaceMapping(int *length, Vertex *vertices, GLint nbPoints, GLint complexity) {
+Vertex *Gem::initStripFaceMapping(int *length, Vertex *vertices, GLint nbPoints, GLint complexity, bool clockWise) {
 
     Vertex *stripVertices = new Vertex[0];
     *length = 0;
@@ -172,51 +182,61 @@ Vertex *Gem::initStripFaceMapping(int *length, Vertex *vertices, GLint nbPoints,
     if(complexity > 1) {
         if (nbPoints > 1) {
 
-            *length = (complexity - 1) * (2 * nbPoints + 1) + 1;
+            *length = (complexity - 1) * 2 * (nbPoints + 1);
             stripVertices = new Vertex[*length];
 
             for(int i = 0; i < complexity - 1; i++) {
 
-                for(int j = 0; j < nbPoints; j++) {
+                for(int j = 0; j <= nbPoints; j++) {
 
-                    stripVertices[i * (2 * nbPoints + 1) + 2 * j] = vertices[i * nbPoints + j];
-                    stripVertices[i * (2 * nbPoints + 1) + 2 * j + 1] = vertices[(i + 1) * nbPoints + j];
+                    if(clockWise) {
+                        stripVertices[2 * (i * (nbPoints + 1) + j)] = vertices[i * nbPoints + (nbPoints - j) % nbPoints];
+                        stripVertices[2 * (i * (nbPoints + 1) + j) + 1] = vertices[(i + 2) * nbPoints - 1 - j % nbPoints];
+                    }
+                    else {
+                        stripVertices[2 * (i * (nbPoints + 1) + j)] = vertices[i * nbPoints + j % nbPoints];
+                        stripVertices[2 * (i * (nbPoints + 1) + j) + 1] = vertices[(i + 1) * nbPoints + j % nbPoints];
+                    }
 
                 }
 
-                stripVertices[2 * nbPoints * (i + 1) + i] = vertices[i * nbPoints];
-
             }
 
-            stripVertices[(complexity - 1) * (2 * nbPoints + 1)] = vertices[(complexity - 1) * nbPoints];
         }
 
         else {
 
-            *length = (complexity - 1) * (2 * middleNbPoints + 1) + 1;
+            *length = (complexity - 1) * 2 * (middleNbPoints + 1);
             stripVertices = new Vertex[*length];
 
-            for(int i = 0; i < middleNbPoints; i++) {
+            for(int i = 0; i <= middleNbPoints; i++) {
 
-                stripVertices[2 * i] = middleVertices[i];
-                stripVertices[2 * i + 1] = vertices[i + 1];
+                if(clockWise) {
+                    stripVertices[2 * i] = middleVertices[(middleNbPoints - i) % middleNbPoints];
+                    stripVertices[2 * i + 1] = vertices[(middleNbPoints - 1) - i % middleNbPoints + 1];
+                }
+                else {
+                    stripVertices[2 * i] = middleVertices[i % middleNbPoints];
+                    stripVertices[2 * i + 1] = vertices[i % middleNbPoints + 1];
+                }
 
             }
-            stripVertices[2 * middleNbPoints] = middleVertices[0];
 
             for(int i = 1; i < complexity - 1; i++) {
-                for(int j = 0; j < middleNbPoints; j++) {
+                for(int j = 0; j <= middleNbPoints; j++) {
 
-                    stripVertices[i * (2 * middleNbPoints + 1) + 2 * j] = vertices[(i - 1) * middleNbPoints + 1 + j];
-                    stripVertices[i * (2 * middleNbPoints + 1) +  2 * j + 1] = vertices[i * middleNbPoints + 1 + j];
+                    if(clockWise) {
+                        stripVertices[2 * (i * (middleNbPoints + 1) + j)] = vertices[(i - 1) * middleNbPoints + 1 + (middleNbPoints - j) % middleNbPoints];
+                        stripVertices[2 * (i * (middleNbPoints + 1) + j) + 1] = vertices[i * (middleNbPoints + 1) - j % middleNbPoints];
+                    }
+                    else {
+                        stripVertices[2 * (i * (middleNbPoints + 1) + j)] = vertices[(i - 1) * middleNbPoints + 1 + j % middleNbPoints];
+                        stripVertices[2 * (i * (middleNbPoints + 1) + j) + 1] = vertices[i * middleNbPoints + 1 + j % middleNbPoints];
+                    }
 
                 }
 
-                stripVertices[(i + 1) * (2 * middleNbPoints + 1) - 1] = vertices[(i - 1) * middleNbPoints + 1];
-
             }
-
-            stripVertices[(complexity - 1) * (2 * middleNbPoints + 1)] = vertices[(complexity - 2) * middleNbPoints + 1];
 
         }
     }
