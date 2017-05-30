@@ -28,7 +28,7 @@ private:
     void calculateInnerMiddleRadius();
     void initVertices(QVector3D color);
     void initMapping();
-    Vertex *initFaceVertices(GLfloat height, GLfloat radius, GLint nbPoints, GLint Complexity, QVector3D color);
+    Vertex *initFaceVertices(bool counterClockWise, GLfloat height, GLfloat radius, GLint nbPoints, GLint Complexity, QVector3D color);
     Vertex *initFanFaceMapping(int *length, Vertex *vertices, GLint nbPoints, GLint complexity, bool clockWise);
     Vertex *initStripFaceMapping(int *length, Vertex *vertices, GLint nbPoints, GLint complexity, bool clockWise);
     Vertex *initTrianglesFaceMapping(int *length, Vertex *vertices, GLint nbPoints, GLint complexity);

@@ -37,8 +37,8 @@ void Gem::initVertices(QVector3D color) {
 
     calculateInnerMiddleRadius();
 
-    topVertices = initFaceVertices(topHeight, topRadius, topNbPoints, topComplexity, color);
-    bottomVertices = initFaceVertices(bottomHeight, bottomRadius, bottomNbPoints, bottomComplexity, color);
+    topVertices = initFaceVertices(true, topHeight, topRadius, topNbPoints, topComplexity, color);
+    bottomVertices = initFaceVertices(false, bottomHeight, bottomRadius, bottomNbPoints, bottomComplexity, color);
 
 }
 
@@ -51,7 +51,7 @@ void Gem::calculateInnerMiddleRadius() {
 
 }
 
-Vertex *Gem::initFaceVertices(GLfloat height, GLfloat radius, GLint nbPoints, GLint complexity, QVector3D color) {
+Vertex *Gem::initFaceVertices(bool counterClockWise, GLfloat height, GLfloat radius, GLint nbPoints, GLint complexity, QVector3D color) {
 
     Vertex *vertices;
 
@@ -70,7 +70,7 @@ Vertex *Gem::initFaceVertices(GLfloat height, GLfloat radius, GLint nbPoints, GL
                 float x, y, z;
                 float complexityCircleRadius = radius + (complexity - 1 - i) * ((middleRadius - radius) / complexity);
                 x = (float) cos(j * angle + offset) * complexityCircleRadius;
-                z = (float) sin(j * angle + offset) * complexityCircleRadius;
+                z = (float) sin((j * angle + offset) * (2 * counterClockWise - 1)) * complexityCircleRadius;
                 y = (i + 1) * (height / complexity);
                 vertices[(i * nbPoints) + j] = Vertex(QVector3D(x, y, z), color);
 
@@ -95,7 +95,7 @@ Vertex *Gem::initFaceVertices(GLfloat height, GLfloat radius, GLint nbPoints, GL
                 float x, y, z;
                 float complexityCircleRadius = middleRadius - (i + 1) * (middleRadius / complexity);
                 x = (float) cos(j * angle + offset) * complexityCircleRadius;
-                z = (float) sin(j * angle + offset) * complexityCircleRadius;
+                z = (float) sin((j * angle + offset) * (2 * counterClockWise - 1)) * complexityCircleRadius;
                 y = (i + 1) * (height / complexity);
                 vertices[(i * middleNbPoints) + j + 1] = Vertex(QVector3D(x, y, z), color);
 
@@ -114,11 +114,11 @@ void Gem::initMapping() {
     drawVertices = new Vertex*[6];
     length = new int[6];
 
-    drawVertices[0] = initFanFaceMapping(&length[0], bottomVertices, bottomNbPoints, bottomComplexity, false);
+    drawVertices[0] = initFanFaceMapping(&length[0], bottomVertices, bottomNbPoints, bottomComplexity, true);
     drawVertices[1] = initStripFaceMapping(&length[1], bottomVertices, bottomNbPoints, bottomComplexity, true);
     drawVertices[2] = initTrianglesFaceMapping(&length[2], bottomVertices, bottomNbPoints, bottomComplexity);
 
-    drawVertices[3] = initFanFaceMapping(&length[3], topVertices, topNbPoints, topComplexity, true);
+    drawVertices[3] = initFanFaceMapping(&length[3], topVertices, topNbPoints, topComplexity, false);
     drawVertices[4] = initStripFaceMapping(&length[4], topVertices, topNbPoints, topComplexity, false);
     drawVertices[5] = initTrianglesFaceMapping(&length[5], topVertices, topNbPoints, topComplexity);
 
@@ -134,12 +134,7 @@ Vertex *Gem::initFanFaceMapping(int *length, Vertex *vertices, GLint nbPoints, G
 
         for(int i = 0; i < nbPoints; i++) {
 
-            if(clockWise) {
-                fanVertices[i] = vertices[(complexity * nbPoints - 1) - i];
-            }
-            else {
-                fanVertices[i] = vertices[(complexity - 1) * nbPoints + i];
-            }
+            fanVertices[i] = vertices[(complexity * nbPoints - 1) - i];
 
         }
     }
@@ -150,12 +145,9 @@ Vertex *Gem::initFanFaceMapping(int *length, Vertex *vertices, GLint nbPoints, G
         fanVertices[0] = vertices[0];
         if(complexity > 1) {
             for (int i = 0; i <= middleNbPoints; i++) {
-                if(clockWise) {
-                    fanVertices[i + 1] = vertices[(complexity - 1) * middleNbPoints - i % middleNbPoints];
-                }
-                else {
-                    fanVertices[i + 1] = vertices[(complexity - 2) * middleNbPoints + 1 + i % middleNbPoints];
-                }
+
+                fanVertices[i + 1] = vertices[(complexity - 1) * middleNbPoints - i % middleNbPoints];
+
             }
         }
         else {
@@ -189,14 +181,8 @@ Vertex *Gem::initStripFaceMapping(int *length, Vertex *vertices, GLint nbPoints,
 
                 for(int j = 0; j <= nbPoints; j++) {
 
-                    if(clockWise) {
-                        stripVertices[2 * (i * (nbPoints + 1) + j)] = vertices[i * nbPoints + (nbPoints - j) % nbPoints];
-                        stripVertices[2 * (i * (nbPoints + 1) + j) + 1] = vertices[(i + 2) * nbPoints - 1 - j % nbPoints];
-                    }
-                    else {
-                        stripVertices[2 * (i * (nbPoints + 1) + j)] = vertices[i * nbPoints + j % nbPoints];
-                        stripVertices[2 * (i * (nbPoints + 1) + j) + 1] = vertices[(i + 1) * nbPoints + j % nbPoints];
-                    }
+                    stripVertices[2 * (i * (nbPoints + 1) + j)] = vertices[i * nbPoints + j % nbPoints];
+                    stripVertices[2 * (i * (nbPoints + 1) + j) + 1] = vertices[(i + 1) * nbPoints + j % nbPoints];
 
                 }
 
@@ -213,7 +199,7 @@ Vertex *Gem::initStripFaceMapping(int *length, Vertex *vertices, GLint nbPoints,
 
                 if(clockWise) {
                     stripVertices[2 * i] = middleVertices[(middleNbPoints - i) % middleNbPoints];
-                    stripVertices[2 * i + 1] = vertices[(middleNbPoints - 1) - i % middleNbPoints + 1];
+                    stripVertices[2 * i + 1] = vertices[i % middleNbPoints + 1];
                 }
                 else {
                     stripVertices[2 * i] = middleVertices[i % middleNbPoints];
@@ -225,14 +211,8 @@ Vertex *Gem::initStripFaceMapping(int *length, Vertex *vertices, GLint nbPoints,
             for(int i = 1; i < complexity - 1; i++) {
                 for(int j = 0; j <= middleNbPoints; j++) {
 
-                    if(clockWise) {
-                        stripVertices[2 * (i * (middleNbPoints + 1) + j)] = vertices[(i - 1) * middleNbPoints + 1 + (middleNbPoints - j) % middleNbPoints];
-                        stripVertices[2 * (i * (middleNbPoints + 1) + j) + 1] = vertices[i * (middleNbPoints + 1) - j % middleNbPoints];
-                    }
-                    else {
-                        stripVertices[2 * (i * (middleNbPoints + 1) + j)] = vertices[(i - 1) * middleNbPoints + 1 + j % middleNbPoints];
-                        stripVertices[2 * (i * (middleNbPoints + 1) + j) + 1] = vertices[i * middleNbPoints + 1 + j % middleNbPoints];
-                    }
+                    stripVertices[2 * (i * (middleNbPoints + 1) + j)] = vertices[(i - 1) * middleNbPoints + 1 + j % middleNbPoints];
+                    stripVertices[2 * (i * (middleNbPoints + 1) + j) + 1] = vertices[i * middleNbPoints + 1 + j % middleNbPoints];
 
                 }
 
@@ -246,6 +226,7 @@ Vertex *Gem::initStripFaceMapping(int *length, Vertex *vertices, GLint nbPoints,
 }
 
 Vertex *Gem::initTrianglesFaceMapping(int *length, Vertex *vertices, GLint nbPoints, GLint complexity) {
+
 
     Vertex *trianglesVertices = new Vertex[0];
 
