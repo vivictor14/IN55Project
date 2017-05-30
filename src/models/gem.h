@@ -26,6 +26,7 @@ private:
     int *length;
 
     void calculateInnerMiddleRadius();
+    float calculateComplexityCircleRadius(GLfloat height, GLfloat radius, GLfloat middleRadius, GLint nbPoints, GLint complexity, int index);
     void initVertices(QVector3D color);
     void initMapping();
     Vertex *initFaceVertices(bool counterClockWise, GLfloat height, GLfloat radius, GLint nbPoints, GLint Complexity, QVector3D color);

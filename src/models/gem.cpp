@@ -46,9 +46,25 @@ void Gem::calculateInnerMiddleRadius() {
 
     QVector3D A = middleVertices[0].position();
     QVector3D B = middleVertices[1].position();
-    QVector3D M = QVector3D((A.x() + B.x()) / 2, (A.y() + B.y()) / 2, (A.z() + B.z()) / 2);
+    QVector3D M = QVector3D((A.x() + B.x()) / 2,
+                            (A.y() + B.y()) / 2,
+                            (A.z() + B.z()) / 2);
     innerMiddleRadius = (GLfloat) sqrt(pow(M.x(), 2) + pow(M.y(), 2) + pow(M.z(), 2));
 
+}
+
+float Gem::calculateComplexityCircleRadius(GLfloat height, GLfloat radius, GLfloat middleRadius, GLint nbPoints, GLint complexity, int index) {
+
+    QVector3D A = QVector3D(radius, height, 0);
+    QVector3D B = QVector3D((float) (middleRadius * cos(2 * M_PI / nbPoints)), 0,
+                            (float) (middleRadius * sin(2 * M_PI / nbPoints)));
+
+    // FIXME M is wrong. Find the right way to calculate M
+    QVector3D M = QVector3D((A.x() + B.x()) * index / complexity,
+                            (A.y() + B.y()) * index / complexity,
+                            (A.z() + B.z()) * index / complexity);
+
+    return (float) sqrt(pow(M.x(), 2) + pow(M.y(), 2) + pow(M.z(), 2));;
 }
 
 Vertex *Gem::initFaceVertices(bool counterClockWise, GLfloat height, GLfloat radius, GLint nbPoints, GLint complexity, QVector3D color) {
@@ -64,11 +80,18 @@ Vertex *Gem::initFaceVertices(bool counterClockWise, GLfloat height, GLfloat rad
         for (int i = 0; i < complexity; i++) {
 
             offset = (i + 1) * angle / 2;
+            float complexityCircleRadius;
+            if(i < complexity - 1) {
+                complexityCircleRadius = calculateComplexityCircleRadius(height, radius, innerMiddleRadius, nbPoints, complexity, i + 1);
+            }
+            else {
+                complexityCircleRadius = radius;
+            }
 
             for (int j = 0; j < nbPoints; j++) {
 
                 float x, y, z;
-                float complexityCircleRadius = radius + (complexity - 1 - i) * ((middleRadius - radius) / complexity);
+
                 x = (float) cos(j * angle + offset) * complexityCircleRadius;
                 z = (float) sin((j * angle + offset) * (2 * counterClockWise - 1)) * complexityCircleRadius;
                 y = (i + 1) * (height / complexity);
@@ -89,11 +112,12 @@ Vertex *Gem::initFaceVertices(bool counterClockWise, GLfloat height, GLfloat rad
         for (int i = 0; i < complexity - 1; i++) {
 
             offset = (i + 1) * angle / 2;
+            float complexityCircleRadius = calculateComplexityCircleRadius(height, 0, middleRadius, nbPoints, complexity, i + 1);
 
             for (int j = 0; j < middleNbPoints; j++) {
 
                 float x, y, z;
-                float complexityCircleRadius = middleRadius - (i + 1) * (middleRadius / complexity);
+
                 x = (float) cos(j * angle + offset) * complexityCircleRadius;
                 z = (float) sin((j * angle + offset) * (2 * counterClockWise - 1)) * complexityCircleRadius;
                 y = (i + 1) * (height / complexity);
