@@ -15,7 +15,7 @@ Gem::Gem(GLfloat topHeight, GLfloat bottomHeight, GLfloat topRadius, GLfloat mid
     this->bottomComplexity = bottomComplexity;
 
     initVertices(color);
-    initMapping();
+    mapping();
 }
 
 Gem::~Gem() {
@@ -55,16 +55,18 @@ void Gem::calculateInnerMiddleRadius() {
 
 float Gem::calculateComplexityCircleRadius(GLfloat height, GLfloat radius, GLfloat middleRadius, GLint nbPoints, GLint complexity, int index) {
 
+    float k = index / (float)(complexity);
     QVector3D A = QVector3D(radius, height, 0);
     QVector3D B = QVector3D((float) (middleRadius * cos(2 * M_PI / nbPoints)), 0,
                             (float) (middleRadius * sin(2 * M_PI / nbPoints)));
+    QVector3D u = A - B;
+    QVector3D M = QVector3D(k * u.x() + B.x(), k * u.y() + B.y(), k * u.z() + B.z());
 
-    // FIXME M is wrong. Find the right way to calculate M
-    QVector3D M = QVector3D((A.x() + B.x()) * index / complexity,
-                            (A.y() + B.y()) * index / complexity,
-                            (A.z() + B.z()) * index / complexity);
+    QVector3D test = QVector3D(0, k * height, 0);
+    float rep = M.distanceToPoint(test);
 
-    return (float) sqrt(pow(M.x(), 2) + pow(M.y(), 2) + pow(M.z(), 2));;
+    return M.distanceToPoint(QVector3D(0, k * height, 0));
+
 }
 
 Vertex *Gem::initFaceVertices(bool counterClockWise, GLfloat height, GLfloat radius, GLint nbPoints, GLint complexity, QVector3D color) {
@@ -112,7 +114,7 @@ Vertex *Gem::initFaceVertices(bool counterClockWise, GLfloat height, GLfloat rad
         for (int i = 0; i < complexity - 1; i++) {
 
             offset = (i + 1) * angle / 2;
-            float complexityCircleRadius = calculateComplexityCircleRadius(height, 0, middleRadius, nbPoints, complexity, i + 1);
+            float complexityCircleRadius = calculateComplexityCircleRadius(height, 0, innerMiddleRadius, middleNbPoints, complexity, i + 1);
 
             for (int j = 0; j < middleNbPoints; j++) {
 
@@ -133,64 +135,81 @@ Vertex *Gem::initFaceVertices(bool counterClockWise, GLfloat height, GLfloat rad
 
 }
 
-void Gem::initMapping() {
+void Gem::mapping() {
 
-    drawVertices = new Vertex*[6];
-    length = new int[6];
+    drawVertices = new Vertex*[8];
+    length = new int[8];
 
-    drawVertices[0] = initFanFaceMapping(&length[0], bottomVertices, bottomNbPoints, bottomComplexity, true);
-    drawVertices[1] = initStripFaceMapping(&length[1], bottomVertices, bottomNbPoints, bottomComplexity, true);
-    drawVertices[2] = initTrianglesFaceMapping(&length[2], bottomVertices, bottomNbPoints, true);
+    if(bottomNbPoints > 1) {
+        drawVertices[0] = tableMapping(&length[0], bottomVertices, bottomNbPoints, bottomComplexity, true);
+    }
+    else {
+        drawVertices[0] = pavilionMapping(&length[0], bottomVertices, bottomNbPoints, bottomComplexity, true);
+    }
+    drawVertices[1] = starMapping(&length[1], bottomVertices, bottomNbPoints, bottomComplexity, true);
+    drawVertices[2] = bezelMapping(&length[2], bottomVertices, bottomNbPoints, bottomComplexity, true);
+    drawVertices[3] = upperGirdleMapping(&length[3], bottomVertices, bottomNbPoints, true);
 
-    drawVertices[3] = initFanFaceMapping(&length[3], topVertices, topNbPoints, topComplexity, false);
-    drawVertices[4] = initStripFaceMapping(&length[4], topVertices, topNbPoints, topComplexity, false);
-    drawVertices[5] = initTrianglesFaceMapping(&length[5], topVertices, topNbPoints, false);
+    if(topNbPoints > 1) {
+        drawVertices[4] = tableMapping(&length[4], topVertices, topNbPoints, topComplexity, false);
+    }
+    else {
+        drawVertices[4] = pavilionMapping(&length[4], topVertices, topNbPoints, topComplexity, false);
+    }
+    drawVertices[5] = starMapping(&length[5], topVertices, topNbPoints, topComplexity, false);
+    drawVertices[6] = bezelMapping(&length[6], topVertices, topNbPoints, topComplexity, false);
+    drawVertices[7] = upperGirdleMapping(&length[7], topVertices, topNbPoints, false);
 
 }
 
-Vertex *Gem::initFanFaceMapping(int *length, Vertex *vertices, GLint nbPoints, GLint complexity, bool clockWise) {
+Vertex *Gem::tableMapping(int *length, Vertex *vertices, GLint nbPoints, GLint complexity, bool clockWise) {
 
-    Vertex *fanVertices;
+    Vertex *tableVertices;
 
-    if(nbPoints > 1) {
-        *length = nbPoints;
-        fanVertices = new Vertex[nbPoints];
+    *length = nbPoints;
+    tableVertices = new Vertex[nbPoints];
 
-        for(int i = 0; i < nbPoints; i++) {
+    for(int i = 0; i < nbPoints; i++) {
 
-            fanVertices[i] = vertices[(complexity * nbPoints - 1) - i];
+        tableVertices[i] = vertices[(complexity * nbPoints - 1) - i];
+
+    }
+
+    return tableVertices;
+
+}
+
+Vertex *Gem::pavilionMapping(int *length, Vertex *vertices, GLint nbPoints, GLint complexity, bool clockWise) {
+
+    Vertex *pavilionVertices;
+
+    *length = middleNbPoints + 2;
+
+    pavilionVertices = new Vertex[middleNbPoints + 2];
+    pavilionVertices[0] = vertices[0];
+    if(complexity > 1) {
+        for (int i = 0; i <= middleNbPoints; i++) {
+
+            pavilionVertices[i + 1] = vertices[(complexity - 1) * middleNbPoints - i % middleNbPoints];
 
         }
     }
     else {
-        *length = middleNbPoints + 2;
-
-        fanVertices = new Vertex[middleNbPoints + 2];
-        fanVertices[0] = vertices[0];
-        if(complexity > 1) {
-            for (int i = 0; i <= middleNbPoints; i++) {
-
-                fanVertices[i + 1] = vertices[(complexity - 1) * middleNbPoints - i % middleNbPoints];
-
+        for (int i = 0; i <= middleNbPoints; i++) {
+            if(clockWise) {
+                pavilionVertices[i + 1] = middleVertices[(middleNbPoints - 1) - i % middleNbPoints];
             }
-        }
-        else {
-            for (int i = 0; i <= middleNbPoints; i++) {
-                if(clockWise) {
-                    fanVertices[i + 1] = middleVertices[(middleNbPoints - 1) - i % middleNbPoints];
-                }
-                else {
-                    fanVertices[i + 1] = middleVertices[i % middleNbPoints];
-                }
+            else {
+                pavilionVertices[i + 1] = middleVertices[i % middleNbPoints];
             }
         }
     }
 
-    return fanVertices;
+    return pavilionVertices;
 
 }
 
-Vertex *Gem::initStripFaceMapping(int *length, Vertex *vertices, GLint nbPoints, GLint complexity, bool clockWise) {
+Vertex *Gem::starMapping(int *length, Vertex *vertices, GLint nbPoints, GLint complexity, bool clockWise) {
 
     Vertex *stripVertices = new Vertex[0];
     *length = 0;
@@ -249,7 +268,11 @@ Vertex *Gem::initStripFaceMapping(int *length, Vertex *vertices, GLint nbPoints,
 
 }
 
-Vertex *Gem::initTrianglesFaceMapping(int *length, Vertex *vertices, GLint nbPoints, bool clockwise) {
+Vertex *Gem::bezelMapping(int *length, Vertex *vertices, GLint nbPoints, GLint complexity, bool clockWise) {
+    return nullptr;
+}
+
+Vertex *Gem::upperGirdleMapping(int *length, Vertex *vertices, GLint nbPoints, bool clockwise) {
 
     Vertex *trianglesVertices = new Vertex[0];
 
@@ -297,102 +320,102 @@ void Gem::initializeBuffer(QOpenGLShaderProgram *shaderProgram) {
 
     initializeOpenGLFunctions();
 
-    vbo = new QOpenGLBuffer[6];
-    vao = new QOpenGLVertexArrayObject[6];
+    vbo = new QOpenGLBuffer[8];
+    vao = new QOpenGLVertexArrayObject[8];
 
-//    vbo[0].create();
-//    vbo[0].bind();
-//    vbo[0].setUsagePattern(QOpenGLBuffer::StaticDraw);
-//    vbo[0].allocate(topVertices, topComplexity * topNbPoints * sizeof(Vertex));
-//
-//    vao[0].create();
-//    vao[0].bind();
-//    shaderProgram->enableAttributeArray(0);
-//    shaderProgram->enableAttributeArray(1);
-//    shaderProgram->setAttributeBuffer(0, GL_FLOAT, Vertex::positionOffset(), Vertex::PositionTupleSize, Vertex::stride());
-//    shaderProgram->setAttributeBuffer(1, GL_FLOAT, Vertex::colorOffset(), Vertex::ColorTupleSize, Vertex::stride());
-//
-//    vao[0].release();
-//    vbo[0].release();
-//
-//    vbo[1].create();
-//    vbo[1].bind();
-//    vbo[1].setUsagePattern(QOpenGLBuffer::StaticDraw);
-//    vbo[1].allocate(bottomVertices, ((bottomComplexity - 1) * middleNbPoints + 1) * sizeof(Vertex));
-//
-//    vao[1].create();
-//    vao[1].bind();
-//    shaderProgram->enableAttributeArray(0);
-//    shaderProgram->enableAttributeArray(1);
-//    shaderProgram->setAttributeBuffer(0, GL_FLOAT, Vertex::positionOffset(), Vertex::PositionTupleSize, Vertex::stride());
-//    shaderProgram->setAttributeBuffer(1, GL_FLOAT, Vertex::colorOffset(), Vertex::ColorTupleSize, Vertex::stride());
-//
-//    vao[1].release();
-//    vbo[1].release();
-//
-//    vbo[2].create();
-//    vbo[2].bind();
-//    vbo[2].setUsagePattern(QOpenGLBuffer::StaticDraw);
-//    vbo[2].allocate(middleVertices, middleNbPoints * sizeof(Vertex));
-//
-//    vao[2].create();
-//    vao[2].bind();
-//    shaderProgram->enableAttributeArray(0);
-//    shaderProgram->enableAttributeArray(1);
-//    shaderProgram->setAttributeBuffer(0, GL_FLOAT, Vertex::positionOffset(), Vertex::PositionTupleSize, Vertex::stride());
-//    shaderProgram->setAttributeBuffer(1, GL_FLOAT, Vertex::colorOffset(), Vertex::ColorTupleSize, Vertex::stride());
-//
-//    vao[2].release();
-//    vbo[2].release();
+    vbo[0].create();
+    vbo[0].bind();
+    vbo[0].setUsagePattern(QOpenGLBuffer::StaticDraw);
+    vbo[0].allocate(topVertices, topComplexity * topNbPoints * sizeof(Vertex));
+
+    vao[0].create();
+    vao[0].bind();
+    shaderProgram->enableAttributeArray(0);
+    shaderProgram->enableAttributeArray(1);
+    shaderProgram->setAttributeBuffer(0, GL_FLOAT, Vertex::positionOffset(), Vertex::PositionTupleSize, Vertex::stride());
+    shaderProgram->setAttributeBuffer(1, GL_FLOAT, Vertex::colorOffset(), Vertex::ColorTupleSize, Vertex::stride());
+
+    vao[0].release();
+    vbo[0].release();
+
+    vbo[1].create();
+    vbo[1].bind();
+    vbo[1].setUsagePattern(QOpenGLBuffer::StaticDraw);
+    vbo[1].allocate(bottomVertices, ((bottomComplexity - 1) * middleNbPoints + 1) * sizeof(Vertex));
+
+    vao[1].create();
+    vao[1].bind();
+    shaderProgram->enableAttributeArray(0);
+    shaderProgram->enableAttributeArray(1);
+    shaderProgram->setAttributeBuffer(0, GL_FLOAT, Vertex::positionOffset(), Vertex::PositionTupleSize, Vertex::stride());
+    shaderProgram->setAttributeBuffer(1, GL_FLOAT, Vertex::colorOffset(), Vertex::ColorTupleSize, Vertex::stride());
+
+    vao[1].release();
+    vbo[1].release();
+
+    vbo[2].create();
+    vbo[2].bind();
+    vbo[2].setUsagePattern(QOpenGLBuffer::StaticDraw);
+    vbo[2].allocate(middleVertices, middleNbPoints * sizeof(Vertex));
+
+    vao[2].create();
+    vao[2].bind();
+    shaderProgram->enableAttributeArray(0);
+    shaderProgram->enableAttributeArray(1);
+    shaderProgram->setAttributeBuffer(0, GL_FLOAT, Vertex::positionOffset(), Vertex::PositionTupleSize, Vertex::stride());
+    shaderProgram->setAttributeBuffer(1, GL_FLOAT, Vertex::colorOffset(), Vertex::ColorTupleSize, Vertex::stride());
+
+    vao[2].release();
+    vbo[2].release();
 
 
-    for(int i = 0; i < 6; i++) {
-        vbo[i].create();
-        vbo[i].bind();
-        vbo[i].setUsagePattern(QOpenGLBuffer::StaticDraw);
-        vbo[i].allocate(drawVertices[i], length[i] * sizeof(Vertex));
-
-        vao[i].create();
-        vao[i].bind();
-        shaderProgram->enableAttributeArray(0);
-        shaderProgram->enableAttributeArray(1);
-        shaderProgram->setAttributeBuffer(0, GL_FLOAT, Vertex::positionOffset(), Vertex::PositionTupleSize, Vertex::stride());
-        shaderProgram->setAttributeBuffer(1, GL_FLOAT, Vertex::colorOffset(), Vertex::ColorTupleSize, Vertex::stride());
-
-        vao[i].release();
-        vbo[i].release();
-    }
+//    for(int i = 0; i < 8; i++) {
+//        vbo[i].create();
+//        vbo[i].bind();
+//        vbo[i].setUsagePattern(QOpenGLBuffer::StaticDraw);
+//        vbo[i].allocate(drawVertices[i], length[i] * sizeof(Vertex));
+//
+//        vao[i].create();
+//        vao[i].bind();
+//        shaderProgram->enableAttributeArray(0);
+//        shaderProgram->enableAttributeArray(1);
+//        shaderProgram->setAttributeBuffer(0, GL_FLOAT, Vertex::positionOffset(), Vertex::PositionTupleSize, Vertex::stride());
+//        shaderProgram->setAttributeBuffer(1, GL_FLOAT, Vertex::colorOffset(), Vertex::ColorTupleSize, Vertex::stride());
+//
+//        vao[i].release();
+//        vbo[i].release();
+//    }
 
 }
 
 void Gem::drawShape(QOpenGLShaderProgram *shaderProgram, int u_modelToWorld, Transform3D m_transform) {
 
-    for(int i = 0; i < 6; i++) {
-        vao[i].bind();
-        shaderProgram->setUniformValue(u_modelToWorld, m_transform.toMatrix());
-        if(i%3 == 0) {
-            glDrawArrays(GL_TRIANGLE_FAN, 0, length[i]);
-        }
-        else if(i%3 == 1){
-            glDrawArrays(GL_TRIANGLE_STRIP, 0, length[i]);
-        }
-        else {
-            glDrawArrays(GL_TRIANGLES, 0, length[i]);
-        }
-        vao[i].release();
-    }
+//    for(int i = 0; i < 8; i++) {
+//        vao[i].bind();
+//        shaderProgram->setUniformValue(u_modelToWorld, m_transform.toMatrix());
+//        if(i%3 == 0) {
+//            glDrawArrays(GL_TRIANGLE_FAN, 0, length[i]);
+//        }
+//        else if(i%3 == 1){
+//            glDrawArrays(GL_TRIANGLE_STRIP, 0, length[i]);
+//        }
+//        else {
+//            glDrawArrays(GL_TRIANGLES, 0, length[i]);
+//        }
+//        vao[i].release();
+//    }
 
-//    vao[0].bind();
-//    shaderProgram->setUniformValue(u_modelToWorld, m_transform.toMatrix());
-//    glDrawArrays(GL_POINTS, 0, topComplexity * topNbPoints);
-//    vao[0].release();
-//    vao[1].bind();
-//    shaderProgram->setUniformValue(u_modelToWorld, m_transform.toMatrix());
-//    glDrawArrays(GL_POINTS, 0, (bottomComplexity - 1) * middleNbPoints + 1);
-//    vao[1].release();
-//    vao[2].bind();
-//    shaderProgram->setUniformValue(u_modelToWorld, m_transform.toMatrix());
-//    glDrawArrays(GL_POINTS, 0, middleNbPoints);
-//    vao[2].release();
+    vao[0].bind();
+    shaderProgram->setUniformValue(u_modelToWorld, m_transform.toMatrix());
+    glDrawArrays(GL_POINTS, 0, topComplexity * topNbPoints);
+    vao[0].release();
+    vao[1].bind();
+    shaderProgram->setUniformValue(u_modelToWorld, m_transform.toMatrix());
+    glDrawArrays(GL_POINTS, 0, (bottomComplexity - 1) * middleNbPoints + 1);
+    vao[1].release();
+    vao[2].bind();
+    shaderProgram->setUniformValue(u_modelToWorld, m_transform.toMatrix());
+    glDrawArrays(GL_POINTS, 0, middleNbPoints);
+    vao[2].release();
 
 }
