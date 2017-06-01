@@ -10,6 +10,13 @@
 #include <QtGui/QOpenGLBuffer>
 #include <src/util/vertex.h>
 
+struct VerticesMapping {
+    Vertex *vertices;
+    int length = 0;
+    QVector3D *normals;
+    GLenum mode;
+};
+
 class Gem : protected QOpenGLFunctions {
 private:
 
@@ -18,23 +25,21 @@ private:
     GLint topNbPoints, middleNbPoints, bottomNbPoints, topComplexity, bottomComplexity;
 
     Vertex *topVertices, *middleVertices, *bottomVertices;
-    Vertex **drawVertices;
+    VerticesMapping *mappings;
 
     QOpenGLBuffer *vbo;
     QOpenGLVertexArrayObject *vao;
 
-    int *length;
-
     void calculateInnerMiddleRadius();
-    float calculateComplexityCircleRadius(GLfloat height, GLfloat radius, GLfloat middleRadius, GLint nbPoints, GLint complexity, int index);
+    float calculateComplexityCircleRadius(GLfloat height, GLfloat radius, GLint nbPoints, GLint complexity, int index);
     void initVertices(QVector3D color);
     void mapping();
     Vertex *initFaceVertices(bool counterClockWise, GLfloat height, GLfloat radius, GLint nbPoints, GLint Complexity, QVector3D color);
-    Vertex *tableMapping(int *length, Vertex *vertices, GLint nbPoints, GLint complexity, bool clockWise);
-    Vertex *pavilionMapping(int *length, Vertex *vertices, GLint nbPoints, GLint complexity, bool clockWise);
-    Vertex *starMapping(int *length, Vertex *vertices, GLint nbPoints, GLint complexity, bool clockWise);
-    Vertex *bezelMapping(int *length, Vertex *vertices, GLint nbPoints, GLint complexity, bool clockWise);
-    Vertex *upperGirdleMapping(int *length, Vertex *vertices, GLint nbPoints, bool clockwise);
+    void tableMapping(VerticesMapping *mapping, Vertex *vertices, GLint nbPoints, GLint complexity);
+    void pavilionMapping(VerticesMapping *mapping, Vertex *vertices, GLint complexity, bool clockWise);
+    void starMapping(VerticesMapping *mapping, Vertex *vertices, GLint nbPoints, GLint complexity);
+    void bezelMapping(VerticesMapping *mapping, Vertex *vertices, GLint nbPoints, GLint complexity);
+    void upperGirdleMapping(VerticesMapping *mapping, Vertex *vertices, GLint nbPoints, GLint complexity, bool clockWise);
 
 public:
 
