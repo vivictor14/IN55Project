@@ -14,19 +14,24 @@ public:
     // Accessors / Mutators
     Q_DECL_CONSTEXPR const QVector3D& position() const;
     Q_DECL_CONSTEXPR const QVector3D& color() const;
+
+    void setNormale(const QVector3D& normale);
     void setPosition(const QVector3D& position);
     void setColor(const QVector3D& color);
 
     // OpenGL Helpers
     static const int PositionTupleSize = 3;
     static const int ColorTupleSize = 3;
+    static const int NormaleTupleSize = 3;
     static Q_DECL_CONSTEXPR int positionOffset();
     static Q_DECL_CONSTEXPR int colorOffset();
+    static Q_DECL_CONSTEXPR int normaleOffset();
     static Q_DECL_CONSTEXPR int stride();
 
 private:
     QVector3D m_position;
     QVector3D m_color;
+    QVector3D m_normale;
 };
 
 /*******************************************************************************
@@ -46,10 +51,12 @@ Q_DECL_CONSTEXPR inline const QVector3D& Vertex::position() const { return m_pos
 Q_DECL_CONSTEXPR inline const QVector3D& Vertex::color() const { return m_color; }
 void inline Vertex::setPosition(const QVector3D& position) { m_position = position; }
 void inline Vertex::setColor(const QVector3D& color) { m_color = color; }
+void inline Vertex::setNormale(const QVector3D& normale) { m_normale = normale; }
 
 // OpenGL Helpers
 Q_DECL_CONSTEXPR inline int Vertex::positionOffset() { return offsetof(Vertex, m_position); }
 Q_DECL_CONSTEXPR inline int Vertex::colorOffset() { return offsetof(Vertex, m_color); }
+Q_DECL_CONSTEXPR inline int Vertex::normaleOffset() { return offsetof(Vertex, m_normale); }
 Q_DECL_CONSTEXPR inline int Vertex::stride() { return sizeof(Vertex); }
 
 #endif //IN55PROJECT_VERTEX_H

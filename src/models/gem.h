@@ -9,6 +9,7 @@
 #include <QtGui/QOpenGLVertexArrayObject>
 #include <QtGui/QOpenGLBuffer>
 #include <src/util/vertex.h>
+#include <vector>
 
 struct VerticesMapping {
     Vertex *vertices;
@@ -41,6 +42,7 @@ private:
     void bezelMapping(VerticesMapping *mapping, Vertex *vertices, GLint nbPoints, GLint complexity);
     void upperGirdleMapping(VerticesMapping *mapping, Vertex *vertices, GLint nbPoints, GLint complexity, bool clockWise);
 
+
 public:
 
     Gem(GLfloat topHeight, GLfloat bottomHeight, GLfloat topRadius, GLfloat middleRadius, GLfloat bottomRadius, GLint topNbPoints, GLint middleNbPoints, GLint bottomNbPoints, GLint topComplexity, GLint bottomComplexity, QVector3D color);
@@ -48,8 +50,9 @@ public:
     void initializeBuffer(QOpenGLShaderProgram *shaderProgram);
     void drawShape(QOpenGLShaderProgram *shaderProgram, int u_modelToWorld, Transform3D m_transform);
 
+    void calculateNormal(VerticesMapping *pMapping);
 
-
+    void normalPerVertex(Vertex *pVertex);
 };
 
 

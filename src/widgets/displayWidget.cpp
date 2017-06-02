@@ -4,7 +4,7 @@ DisplayWidget::DisplayWidget() {
     setFocusPolicy( Qt::StrongFocus );
     m_camera.rotate(-40, 1, 0, 0);
     m_transform.translate(0, -20, -20);
-    gem = new Gem(2, -4, 4, 5, 4, 8, 8, 8, 5, 5, QVector3D(0.0f, 1.0f, 1.0f));
+    gem = new Gem(2, -4, 4, 6, 4, 4, 4, 4, 5, 5, QVector3D(0.0f, 1.0f, 1.0f));
 }
 
 DisplayWidget::~DisplayWidget() {
@@ -24,7 +24,7 @@ void DisplayWidget::initializeGL() {
     //Active la transparence
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    
+
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
     shaderProgram = new QOpenGLShaderProgram();
