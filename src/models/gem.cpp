@@ -162,38 +162,77 @@ void Gem::mapping() {
 
 void Gem::tableMapping(VerticesMapping *mapping, Vertex *vertices, GLint nbPoints, GLint complexity) {
     
-    mapping->mode = GL_TRIANGLE_FAN;
-    mapping->length = nbPoints;
-    mapping->vertices = new Vertex[nbPoints];
+//    mapping->mode = GL_TRIANGLE_FAN;
+//    mapping->length = nbPoints;
+//    mapping->vertices = new Vertex[nbPoints];
+//
+//    for(int i = 0; i < nbPoints; i++) {
+//
+//        mapping->vertices[i] = vertices[(complexity * (nbPoints - 1)) - i];
+//
+//    }
+
+    mapping->mode = GL_TRIANGLES;
+    mapping->length = nbPoints *3 ;
+    mapping->vertices = new Vertex[mapping->length];
+
 
     for(int i = 0; i < nbPoints; i++) {
 
-        mapping->vertices[i] = vertices[(complexity * nbPoints - 1) - i];
-
+        mapping->vertices[3*i] = vertices[(complexity * nbPoints - 1) - 0];
+        mapping->vertices[3*i+1] = vertices[(complexity * nbPoints - 1) - (i+1)%nbPoints];
+        mapping->vertices[3*i+2] = vertices[(complexity * nbPoints - 1) - (i+2)%nbPoints];
     }
-
 }
 
 void Gem::pavilionMapping(VerticesMapping *mapping, Vertex *vertices, GLint complexity, bool clockWise) {
 
-    mapping->mode = GL_TRIANGLE_FAN;
-    mapping->length  = middleNbPoints + 2;
-    mapping->vertices = new Vertex[middleNbPoints + 2];
-    mapping->vertices[0] = vertices[middleNbPoints * (complexity - 1)];
+//    mapping->mode = GL_TRIANGLE_FAN;
+//    mapping->length  = middleNbPoints + 2;
+//    mapping->vertices = new Vertex[middleNbPoints + 2];
+//    mapping->vertices[0] = vertices[middleNbPoints * (complexity - 1)];
+//    if(complexity > 1) {
+//        for (int i = 0; i <= middleNbPoints; i++) {
+//
+//            mapping->vertices[i + 1] = vertices[(complexity - 1) * middleNbPoints - 1 - i % middleNbPoints];
+//
+//        }
+//    }
+//    else {
+//        for (int i = 0; i <= middleNbPoints; i++) {
+//            if(clockWise) {
+//                mapping->vertices[i + 1] = middleVertices[i % middleNbPoints];
+//            }
+//            else {
+//                mapping->vertices[i + 1] = middleVertices[(middleNbPoints - 1) - i % middleNbPoints];
+//            }
+//        }
+//    }
+
+    mapping->mode = GL_TRIANGLES;
+    mapping->length  = (middleNbPoints + 2)*3;
+    mapping->vertices = new Vertex[mapping->length];
+
     if(complexity > 1) {
         for (int i = 0; i <= middleNbPoints; i++) {
 
-            mapping->vertices[i + 1] = vertices[(complexity - 1) * middleNbPoints - 1 - i % middleNbPoints];
+            mapping->vertices[3 * i] = vertices[middleNbPoints * (complexity - 1)];
+            mapping->vertices[3 * i + 1] = vertices[(complexity - 1) * middleNbPoints - 1 - i % middleNbPoints];
+            mapping->vertices[3 * i + 2] = vertices[(complexity - 1) * middleNbPoints - 1 - (i+1) % middleNbPoints];
 
         }
     }
     else {
         for (int i = 0; i <= middleNbPoints; i++) {
             if(clockWise) {
-                mapping->vertices[i + 1] = middleVertices[i % middleNbPoints];
+                mapping->vertices[3 * i] = vertices[middleNbPoints * (complexity - 1)];
+                mapping->vertices[3 * i + 1] = middleVertices[i % middleNbPoints];
+                mapping->vertices[3 * i + 2] = middleVertices[(i+1) % middleNbPoints];
             }
             else {
-                mapping->vertices[i + 1] = middleVertices[(middleNbPoints - 1) - i % middleNbPoints];
+                mapping->vertices[3 * i] = vertices[middleNbPoints * (complexity - 1)];
+                mapping->vertices[3 * i + 1] = middleVertices[(middleNbPoints - 1) - i % middleNbPoints];
+                mapping->vertices[3 * i + 2] = middleVertices[(middleNbPoints - 1) - (i+1) % middleNbPoints];
             }
         }
     }
@@ -454,7 +493,7 @@ void Gem::calculateNormal(VerticesMapping *Mapping) {
                 y = (u->z()*v->x() -(u->x()*v->z()));
                 z = (u->x()*v->y() - (u->y()*v->x()));
                 n = new QVector3D(x,y,z);
-                Mapping->vertices[0].setNormale(Mapping->vertices[0].getNormale()+*n);
+                Mapping->vertices[0].setNormale(*n);
                 Mapping->vertices[i].setNormale(*n);
                 Mapping->vertices[i+1].setNormale(*n);
             }
@@ -466,16 +505,16 @@ void Gem::calculateNormal(VerticesMapping *Mapping) {
             y = (u->z()*v->x() -(u->x()*v->z()));
             z = (u->x()*v->y() - (u->y()*v->x()));
             n = new QVector3D(x,y,z);
-            Mapping->vertices[0].setNormale(Mapping->vertices[0].getNormale()+*n);
+            Mapping->vertices[0].setNormale(*n);
             Mapping->vertices[Mapping->length-1].setNormale(*n);
             Mapping->vertices[1].setNormale(*n);
-//            Mapping->normals[0] += *n/ Mapping->length;;
             break;
         }
     }
 
 }
 
+//Smoth version
 void Gem::normalPerVertex(Vertex *pVertex) {
 
     QVector3D normal;
