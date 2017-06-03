@@ -27,9 +27,17 @@ private:
     int u_modelToWorld;
     int u_worldToCamera;
     int u_cameraToView;
+    int u_light;
     QMatrix4x4 m_projection;
     Camera3D m_camera;
     Transform3D m_transform;
+    struct ligth
+    {
+        QVector4D pos;
+        QVector4D ambiant;
+        QVector4D diffuse;
+        QVector4D specular;
+    }lumiere;
 
 public:
 

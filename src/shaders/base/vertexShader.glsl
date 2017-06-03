@@ -1,5 +1,13 @@
 #version 330
 
+struct ligth
+{
+  vec4 pos;
+  vec4 ambiant;
+  vec4 diffuse;
+  vec4 specular;
+};
+
 layout(location = 0) in vec3 position;
 layout(location = 1) in vec3 color;
 layout(location = 2) in vec3 normal;
@@ -11,6 +19,8 @@ out vec4 vColor;
 uniform mat4 modelToWorld; // P
 uniform mat4 worldToCamera; // V
 uniform mat4 cameraToView; // M
+uniform ligth lumiere; // M
+
 //
 //void main()
 //{
@@ -75,9 +85,9 @@ void DirectionalLight(in vec3 V, in vec3 normal,inout vec4 ambient,inout vec4 di
         nDotH = max(0.0, dot(normal, halfway_vector));
         pf = pow(nDotH, 4*1);
     }
-    ambient += vec4(0.2f, 0.4f, 0.3f, 1.0f );
-    diffuse += vec4(0.0f, 0.0f, 1.0f, 1.0f ) * nDotLi;
-    specular += vec4(0.0f, 0.0f, 0.0f, 1.0f ) ;
+    ambient += lumiere.ambiant;
+    diffuse += lumiere.diffuse * nDotLi;
+    specular += lumiere.specular ;
 }
 
 void PointLight(in vec3 V, in vec3 sp, in vec3 normal, inout vec4 ambient, inout vec4 diffuse, inout vec4 specular )
@@ -90,7 +100,7 @@ void PointLight(in vec3 V, in vec3 sp, in vec3 normal, inout vec4 ambient, inout
     vec3 L;  // direction from surface to light position
     vec3 halfway_vector;  // direction of maximum highlights
 
-    L = vec3(vec4(0.f,0.f,0.f,1.0f)) - sp;
+    L = lumiere.pos.xyz - sp;
     d = length( L );
     L = normalize( L );
     attenuation = 1.0 / (0.4 +
@@ -105,9 +115,9 @@ void PointLight(in vec3 V, in vec3 sp, in vec3 normal, inout vec4 ambient, inout
     else
         pf = pow(nDotH, 0.6);
 
-    ambient += vec4(0.f, 0.2f, 0.2f, 1.0f );
-    diffuse += vec4(1.0f, 1.0f, 1.0f, 1.0f ) * nDotLi;
-    specular += vec4(0.0f, 0.0f, 1.0f, 1.0f ) * pf;
+    ambient += lumiere.ambiant;
+    diffuse += lumiere.diffuse * nDotLi;
+    specular += lumiere.specular * pf;
 }
 
 //

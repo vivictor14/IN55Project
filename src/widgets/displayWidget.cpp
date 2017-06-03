@@ -4,6 +4,10 @@ DisplayWidget::DisplayWidget() {
     setFocusPolicy( Qt::StrongFocus );
     m_camera.rotate(-40, 1, 0, 0);
     m_transform.translate(0, -20, -20);
+    lumiere.pos = {0.0f,0.0f,0.0f,1.0f};
+    lumiere.ambiant = {0.f, 0.2f, 0.2f, 1.0f };
+    lumiere.specular = {0.0f, 0.0f, 1.0f, 1.0f };
+    lumiere.diffuse = {1.0f, 1.0f, 1.0f, 1.0f };
     gem = new Gem(2, -4, 4, 6, 1, 22, 22, 1, 5, 5, QVector3D(0.0f, 1.0f, 1.0f));
 }
 
@@ -53,6 +57,10 @@ void DisplayWidget::paintGL() {
     shaderProgram->bind();
     shaderProgram->setUniformValue(u_worldToCamera, m_camera.toMatrix());
     shaderProgram->setUniformValue(u_cameraToView, m_projection);
+    shaderProgram->setUniformValue("lumiere.pos", lumiere.pos);
+    shaderProgram->setUniformValue("lumiere.ambiant", lumiere.ambiant);
+    shaderProgram->setUniformValue("lumiere.specular", lumiere.specular);
+    shaderProgram->setUniformValue("lumiere.diffuse", lumiere.diffuse);
     gem->drawShape(shaderProgram, u_modelToWorld, m_transform);
     shaderProgram->release();
 
@@ -104,6 +112,13 @@ void DisplayWidget::update() {
         if (Input::keyPressed(Qt::Key_E))
         {
             translation += m_camera.up();
+        }
+
+        if (Input::keyPressed(Qt::Key_L))
+        {
+            lumiere.pos.setZ(m_camera.translation().z()) ;
+            lumiere.pos.setY(m_camera.translation().y()) ;
+            lumiere.pos.setX(m_camera.translation().x()) ;
         }
         m_camera.translate(transSpeed * translation);
     }
