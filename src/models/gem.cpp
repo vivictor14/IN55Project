@@ -357,11 +357,12 @@ void Gem::initializeBuffer(QOpenGLShaderProgram *shaderProgram) {
     for(int i=0;i<8;i++) {
         calculateNormal(&mappings[i]);
     }
-    for(int i=0;i<8;i++) {
-        for (int j = 0; j < mappings[i].length; j++) {
-             normalPerVertex(&mappings[i].vertices[j]);
-        }
-    }
+//
+//    for(int i=0;i<8;i++) {
+//        for (int j = 0; j < mappings[i].length; j++) {
+//             normalPerVertex(&mappings[i].vertices[j]);
+//        }
+//    }
 
     for(int i = 0; i < 8; i++) {
         if(mappings[i].length > 0) {
@@ -434,9 +435,9 @@ void Gem::calculateNormal(VerticesMapping *Mapping) {
                 y = (u->z()*v->x() -(u->x()*v->z()));
                 z = (u->x()*v->y() - (u->y()*v->x()));
                 n = new QVector3D(x,y,z);
-                Mapping->normals[i] = *n;
-                Mapping->normals[i+1] = *n;
-                Mapping->normals[i+2] = *n;
+                Mapping->vertices[i].setNormale(*n);
+                Mapping->vertices[i+1].setNormale(*n);
+                Mapping->vertices[i+2].setNormale(*n);
             }
             break;
         }
@@ -453,10 +454,22 @@ void Gem::calculateNormal(VerticesMapping *Mapping) {
                 y = (u->z()*v->x() -(u->x()*v->z()));
                 z = (u->x()*v->y() - (u->y()*v->x()));
                 n = new QVector3D(x,y,z);
-                Mapping->normals[0] += *n;
-                Mapping->normals[i] = *n;
-                Mapping->normals[i+1] = *n;
+                Mapping->vertices[0].setNormale(Mapping->vertices[0].getNormale()+*n);
+                Mapping->vertices[i].setNormale(*n);
+                Mapping->vertices[i+1].setNormale(*n);
             }
+            point2 = Mapping->vertices[Mapping->length-1];
+            point3 = Mapping->vertices[1];
+            u = new QVector3D(point2.position()-point1.position());
+            v = new QVector3D(point3.position()-point1.position());
+            x = (u->y()*v->z() - (u->z()*v->y()));
+            y = (u->z()*v->x() -(u->x()*v->z()));
+            z = (u->x()*v->y() - (u->y()*v->x()));
+            n = new QVector3D(x,y,z);
+            Mapping->vertices[0].setNormale(Mapping->vertices[0].getNormale()+*n);
+            Mapping->vertices[Mapping->length-1].setNormale(*n);
+            Mapping->vertices[1].setNormale(*n);
+//            Mapping->normals[0] += *n/ Mapping->length;;
             break;
         }
     }

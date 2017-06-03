@@ -18,6 +18,7 @@ public:
     void setNormale(const QVector3D& normale);
     void setPosition(const QVector3D& position);
     void setColor(const QVector3D& color);
+    QVector3D getNormale();
 
     // OpenGL Helpers
     static const int PositionTupleSize = 3;
@@ -52,6 +53,8 @@ Q_DECL_CONSTEXPR inline const QVector3D& Vertex::color() const { return m_color;
 void inline Vertex::setPosition(const QVector3D& position) { m_position = position; }
 void inline Vertex::setColor(const QVector3D& color) { m_color = color; }
 void inline Vertex::setNormale(const QVector3D& normale) { m_normale = normale; }
+QVector3D inline Vertex::getNormale() { return m_normale; }
+
 
 // OpenGL Helpers
 Q_DECL_CONSTEXPR inline int Vertex::positionOffset() { return offsetof(Vertex, m_position); }
