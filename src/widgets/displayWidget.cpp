@@ -5,7 +5,7 @@ DisplayWidget::DisplayWidget() {
     m_camera.rotate(-40, 1, 0, 0);
     m_transform.translate(0, -20, -20);
     lumiere.pos = {0.0f,0.0f,0.0f,1.0f};
-    lumiere.ambiant = {0.f, 0.2f, 0.2f, 1.0f };
+    lumiere.ambiant = {0.8f, 0.8f, 0.8f, 1.0f };
     lumiere.specular = {0.0f, 0.0f, 1.0f, 1.0f };
     lumiere.diffuse = {1.0f, 1.0f, 1.0f, 1.0f };
     gem = new Gem(2, -4, 4, 6, 1, 22, 22, 1, 5, 5, QVector3D(0.0f, 1.0f, 1.0f));

@@ -60,7 +60,7 @@ void main()
     vec3 unit_normal = normalize( glNormalMatrix*normal.xyz );
     vec4 amb = vec4(0.0);  vec4 diff = vec4(0.0);  vec4 spec = vec4(0.0);
 
-//    DirectionalLight(vec3(cameraToView), unit_normal, amb, diff, spec);
+//    DirectionalLight(V, unit_normal, amb, diff, spec);
     PointLight(V, sp, unit_normal, amb, diff, spec);
 
     vColor = vec4(color,1) * amb + vec4(color,1) * diff + vec4(color,1)  * spec;
@@ -76,18 +76,18 @@ void DirectionalLight(in vec3 V, in vec3 normal,inout vec4 ambient,inout vec4 di
     float nDotH;   // normal . light half vector
     float pf;// power factor
 
-    vec3 halfway_vector = normalize(V+vec3(0.f,0.f,0.f).xyz);
-    nDotLi = max(0.0, dot(normal, normalize(vec3(0.f,10.f,0.f))));
+    vec3 halfway_vector = normalize(V+lumiere.pos.xyz);
+    nDotLi = max(0.0, dot(normal, normalize(lumiere.pos.xyz)));
     if (nDotLi == 0.0)
         pf = 0.0;
     else
     {
         nDotH = max(0.0, dot(normal, halfway_vector));
-        pf = pow(nDotH, 4*1);
+        pf = pow(nDotH, 4*0.5);
     }
     ambient += lumiere.ambiant;
     diffuse += lumiere.diffuse * nDotLi;
-    specular += lumiere.specular ;
+    specular += lumiere.specular *pf;
 }
 
 void PointLight(in vec3 V, in vec3 sp, in vec3 normal, inout vec4 ambient, inout vec4 diffuse, inout vec4 specular )
