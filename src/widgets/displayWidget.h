@@ -13,8 +13,7 @@
 #include "camera3d.h"
 #include "input.h"
 #include <QKeyEvent>
-
-class QOpenGLShaderProgram;
+#include <QPainter>
 
 class DisplayWidget : public QOpenGLWidget, protected QOpenGLFunctions {
 
@@ -48,6 +47,11 @@ public:
     void initializeGL();
     void paintGL();
     void resizeGL(int width, int height);
+    void updateGem(GLfloat topHeight, GLfloat bottomHeight, GLfloat topRadius, GLfloat middleRadius,
+                   GLfloat bottomRadius, GLint topNbPoints, GLint middleNbPoints, GLint bottomNbPoints,
+                   GLint topComplexity, GLint bottomComplexity, QColor color);
+
+    Gem *getGem() const;
 
 protected:
     void keyPressEvent(QKeyEvent *event);
@@ -58,7 +62,6 @@ protected:
 protected slots:
 
     void update();
-
 
 };
 

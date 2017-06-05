@@ -29,6 +29,8 @@ set(SOURCE_FILES src/main.cpp
         ${APP_MODELS}/gem.cpp
         ${APP_WIDGETS}/displayWidget.h
         ${APP_WIDGETS}/displayWidget.cpp
+        ${APP_WIDGETS}/menuWidget.h
+        ${APP_WIDGETS}/menuWidget.cpp
         ${APP_UTIL}/vertex.h
         ${APP_UTIL}/transform3D.h
         ${APP_UTIL}/transform3D.cpp

@@ -10,6 +10,7 @@
 #include <QtGui/QOpenGLBuffer>
 #include <src/util/vertex.h>
 #include <vector>
+#include <QtGui/QColor>
 
 struct VerticesMapping {
     Vertex *vertices;
@@ -21,9 +22,12 @@ struct VerticesMapping {
 class Gem : protected QOpenGLFunctions {
 private:
 
+    QColor color;
+
     GLfloat topHeight, bottomHeight;
     GLfloat topRadius, middleRadius, bottomRadius, innerMiddleRadius;
-    GLint topNbPoints, middleNbPoints, bottomNbPoints, topComplexity, bottomComplexity;
+    GLint topNbPoints, middleNbPoints, bottomNbPoints;
+    GLint topComplexity, bottomComplexity;
 
     Vertex *topVertices, *middleVertices, *bottomVertices;
     VerticesMapping *mappings;
@@ -41,18 +45,41 @@ private:
     void starMapping(VerticesMapping *mapping, Vertex *vertices, GLint nbPoints, GLint complexity);
     void bezelMapping(VerticesMapping *mapping, Vertex *vertices, GLint nbPoints, GLint complexity);
     void upperGirdleMapping(VerticesMapping *mapping, Vertex *vertices, GLint nbPoints, GLint complexity, bool clockWise);
+    void calculateNormal(VerticesMapping *pMapping);
 
+    void normalPerVertex(Vertex *pVertex);
 
 public:
 
-    Gem(GLfloat topHeight, GLfloat bottomHeight, GLfloat topRadius, GLfloat middleRadius, GLfloat bottomRadius, GLint topNbPoints, GLint middleNbPoints, GLint bottomNbPoints, GLint topComplexity, GLint bottomComplexity, QVector3D color);
+    Gem(GLfloat topHeight, GLfloat bottomHeight, GLfloat topRadius, GLfloat middleRadius, GLfloat bottomRadius,
+        GLint topNbPoints, GLint middleNbPoints, GLint bottomNbPoints, GLint topComplexity, GLint bottomComplexity,
+        QColor color);
     ~Gem();
     void initializeBuffer(QOpenGLShaderProgram *shaderProgram);
     void drawShape(QOpenGLShaderProgram *shaderProgram, int u_modelToWorld, Transform3D m_transform);
 
-    void calculateNormal(VerticesMapping *pMapping);
+    GLfloat getTopHeight() const;
 
-    void normalPerVertex(Vertex *pVertex);
+    GLfloat getBottomHeight() const;
+
+    GLfloat getTopRadius() const;
+
+    GLfloat getMiddleRadius() const;
+
+    GLfloat getBottomRadius() const;
+
+    GLint getTopNbPoints() const;
+
+    GLint getMiddleNbPoints() const;
+
+    GLint getBottomNbPoints() const;
+
+    GLint getTopComplexity() const;
+
+    GLint getBottomComplexity() const;
+
+    const QColor &getColor() const;
+
 };
 
 

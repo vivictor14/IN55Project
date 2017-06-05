@@ -1,6 +1,7 @@
 #include <QApplication>
 #include <QMainWindow>
 #include "displayWidget.h"
+#include "menuWidget.h"
 
 
 int main(int argv, char **args) {
@@ -11,11 +12,17 @@ int main(int argv, char **args) {
     format.setProfile(QSurfaceFormat::CoreProfile);
     format.setVersion(3, 3);
 
-    DisplayWidget *widget = new DisplayWidget();
-    widget->setFormat(format);
+
+    DisplayWidget *displayWidget = new DisplayWidget();
+    displayWidget->setFormat(format);
+
+    MenuWidget *menuWidget = new MenuWidget(displayWidget);
+
 
     QMainWindow window;
-    window.setCentralWidget(widget);
+    window.setCentralWidget(displayWidget);
+    window.setMenuWidget(menuWidget);
+
     window.resize(QSize(800, 600));
     window.show();
 

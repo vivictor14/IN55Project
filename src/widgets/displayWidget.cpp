@@ -8,7 +8,7 @@ DisplayWidget::DisplayWidget() {
     lumiere.ambiant = {0.8f, 0.8f, 0.8f, 1.0f };
     lumiere.specular = {0.0f, 0.0f, 1.0f, 1.0f };
     lumiere.diffuse = {1.0f, 1.0f, 1.0f, 1.0f };
-    gem = new Gem(2, -4, 4, 6, 1, 22, 22, 1, 5, 5, QVector3D(0.0f, 1.0f, 1.0f));
+    gem = new Gem(2, 4, 4, 6, 4, 8, 8, 8, 5, 5, QColor("red"));
 }
 
 DisplayWidget::~DisplayWidget() {
@@ -43,10 +43,11 @@ void DisplayWidget::initializeGL() {
     u_modelToWorld = shaderProgram->uniformLocation("modelToWorld");
     u_worldToCamera = shaderProgram->uniformLocation("worldToCamera");
     u_cameraToView = shaderProgram->uniformLocation("cameraToView");
+    shaderProgram->release();
 
     gem->initializeBuffer(shaderProgram);
 
-    shaderProgram->release();
+
 
 }
 
@@ -124,7 +125,7 @@ void DisplayWidget::update() {
     }
 
     // Update instance information
-//    m_transform.rotate(1.0f, QVector3D(0.4f, 0.3f, 0.3f));
+    m_transform.rotate(1.0f, QVector3D(0.4f, 0.3f, 0.3f));
 
     // Schedule a redraw
     QOpenGLWidget::update();
@@ -162,4 +163,19 @@ void DisplayWidget::mousePressEvent(QMouseEvent *event)
 void DisplayWidget::mouseReleaseEvent(QMouseEvent *event)
 {
     Input::registerMouseRelease(event->button());
+}
+
+void DisplayWidget::updateGem(GLfloat topHeight, GLfloat bottomHeight, GLfloat topRadius, GLfloat middleRadius,
+                              GLfloat bottomRadius, GLint topNbPoints, GLint middleNbPoints, GLint bottomNbPoints,
+                              GLint topComplexity, GLint bottomComplexity, QColor color) {
+
+//    gem = new Gem(topHeight, bottomHeight, topRadius, middleRadius, bottomRadius, topNbPoints, middleNbPoints,
+//                  bottomNbPoints, topComplexity, bottomComplexity, color);
+//    this->initializeGL();
+//    gem->initializeBuffer(shaderProgram);
+
+}
+
+Gem *DisplayWidget::getGem() const {
+    return gem;
 }

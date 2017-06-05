@@ -1,10 +1,11 @@
 #include "gem.h"
 
-Gem::Gem(GLfloat topHeight, GLfloat bottomHeight, GLfloat topRadius, GLfloat middleRadius, GLfloat bottomRadius, GLint topNbPoints, GLint middleNbPoints,
-         GLint bottomNbPoints, GLint topComplexity, GLint bottomComplexity, QVector3D color) {
+Gem::Gem(GLfloat topHeight, GLfloat bottomHeight, GLfloat topRadius, GLfloat middleRadius, GLfloat bottomRadius,
+         GLint topNbPoints, GLint middleNbPoints, GLint bottomNbPoints, GLint topComplexity, GLint bottomComplexity,
+         QColor color) {
 
     this->topHeight = topHeight;
-    this->bottomHeight = bottomHeight;
+    this->bottomHeight = -bottomHeight;
     this->topRadius = topRadius;
     this->middleRadius = middleRadius;
     this->bottomRadius = bottomRadius;
@@ -13,8 +14,9 @@ Gem::Gem(GLfloat topHeight, GLfloat bottomHeight, GLfloat topRadius, GLfloat mid
     this->bottomNbPoints = bottomNbPoints;
     this->topComplexity = topComplexity;
     this->bottomComplexity = bottomComplexity;
+    this->color = color;
 
-    initVertices(color);
+    initVertices(QVector3D(color.red() / 255.0f, color.green() / 255.0f, color.blue() / 255.0f));
     mapping();
 }
 
@@ -344,6 +346,8 @@ void Gem::initializeBuffer(QOpenGLShaderProgram *shaderProgram) {
 
     initializeOpenGLFunctions();
 
+    shaderProgram->bind();
+
     vbo = new QOpenGLBuffer[8];
     vao = new QOpenGLVertexArrayObject[8];
 
@@ -426,6 +430,8 @@ void Gem::initializeBuffer(QOpenGLShaderProgram *shaderProgram) {
             vbo[i].release();
         }
     }
+
+    shaderProgram->release();
 
 }
 
@@ -544,4 +550,48 @@ void Gem::normalPerVertex(Vertex *pVertex) {
     }
 
 
+}
+
+GLfloat Gem::getTopHeight() const {
+    return topHeight;
+}
+
+GLfloat Gem::getBottomHeight() const {
+    return -bottomHeight;
+}
+
+GLfloat Gem::getTopRadius() const {
+    return topRadius;
+}
+
+GLfloat Gem::getMiddleRadius() const {
+    return middleRadius;
+}
+
+GLfloat Gem::getBottomRadius() const {
+    return bottomRadius;
+}
+
+GLint Gem::getTopNbPoints() const {
+    return topNbPoints;
+}
+
+GLint Gem::getMiddleNbPoints() const {
+    return middleNbPoints;
+}
+
+GLint Gem::getBottomNbPoints() const {
+    return bottomNbPoints;
+}
+
+GLint Gem::getTopComplexity() const {
+    return topComplexity;
+}
+
+GLint Gem::getBottomComplexity() const {
+    return bottomComplexity;
+}
+
+const QColor &Gem::getColor() const {
+    return color;
 }
