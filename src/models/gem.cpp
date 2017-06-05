@@ -27,6 +27,26 @@ Gem::~Gem() {
     }
 }
 
+void Gem::modif(GLfloat topHeight, GLfloat bottomHeight, GLfloat topRadius, GLfloat middleRadius, GLfloat bottomRadius,
+GLint topNbPoints, GLint middleNbPoints, GLint bottomNbPoints, GLint topComplexity, GLint bottomComplexity,
+        QColor color) {
+
+    this->topHeight = topHeight;
+    this->bottomHeight = -bottomHeight;
+    this->topRadius = topRadius;
+    this->middleRadius = middleRadius;
+    this->bottomRadius = bottomRadius;
+    this->topNbPoints = topNbPoints;
+    this->middleNbPoints = middleNbPoints;
+    this->bottomNbPoints = bottomNbPoints;
+    this->topComplexity = topComplexity;
+    this->bottomComplexity = bottomComplexity;
+    this->color = color;
+
+    initVertices(QVector3D(color.red() / 255.0f, color.green() / 255.0f, color.blue() / 255.0f));
+    mapping();
+}
+
 void Gem::initVertices(QVector3D color) {
     middleVertices = new Vertex [ middleNbPoints ];
 
@@ -342,14 +362,15 @@ void Gem::upperGirdleMapping(VerticesMapping *mapping, Vertex *vertices, GLint n
 
 }
 
-void Gem::initializeBuffer(QOpenGLShaderProgram *shaderProgram) {
+void Gem::initializeBuffer(QOpenGLShaderProgram *shaderProgram,bool init) {
 
     initializeOpenGLFunctions();
 
-    shaderProgram->bind();
-
-    vbo = new QOpenGLBuffer[8];
-    vao = new QOpenGLVertexArrayObject[8];
+    if(init) {
+        shaderProgram->bind();
+        vbo = new QOpenGLBuffer[8];
+        vao = new QOpenGLVertexArrayObject[8];
+    }
 
 //    vbo[0].create();
 //    vbo[0].bind();
@@ -409,12 +430,16 @@ void Gem::initializeBuffer(QOpenGLShaderProgram *shaderProgram) {
 
     for(int i = 0; i < 8; i++) {
         if(mappings[i].length > 0) {
-            vbo[i].create();
+            if(init)
+                vbo[i].create();
+
             vbo[i].bind();
             vbo[i].setUsagePattern(QOpenGLBuffer::StaticDraw);
             vbo[i].allocate(mappings[i].vertices, mappings[i].length * sizeof(Vertex));
 
-            vao[i].create();
+            if(init)
+                vao[i].create();
+
             vao[i].bind();
             shaderProgram->enableAttributeArray(0);
             shaderProgram->enableAttributeArray(1);
@@ -431,9 +456,36 @@ void Gem::initializeBuffer(QOpenGLShaderProgram *shaderProgram) {
         }
     }
 
-    shaderProgram->release();
+    if(init)
+        shaderProgram->release();
 
 }
+
+//void Gem::test(QOpenGLShaderProgram *shaderProgram){
+//
+//
+//    for(int i = 0; i < 8; i++) {
+//        if(mappings[i].length > 0) {
+//            vbo[i].bind();
+//            vbo[i].setUsagePattern(QOpenGLBuffer::StaticDraw);
+//            vbo[i].allocate(mappings[i].vertices, mappings[i].length * sizeof(Vertex));
+//
+//            vao[i].bind();
+//            shaderProgram->enableAttributeArray(0);
+//            shaderProgram->enableAttributeArray(1);
+//            shaderProgram->enableAttributeArray(2);
+//            shaderProgram->setAttributeBuffer(0, GL_FLOAT, Vertex::positionOffset(), Vertex::PositionTupleSize,
+//                                              Vertex::stride());
+//            shaderProgram->setAttributeBuffer(1, GL_FLOAT, Vertex::colorOffset(), Vertex::ColorTupleSize,
+//                                              Vertex::stride());
+//            shaderProgram->setAttributeBuffer(2, GL_FLOAT, Vertex::normaleOffset(), Vertex::NormaleTupleSize,
+//                                              Vertex::stride());
+//
+//            vao[i].release();
+//            vbo[i].release();
+//        }
+//    }
+//}
 
 void Gem::drawShape(QOpenGLShaderProgram *shaderProgram, int u_modelToWorld, Transform3D m_transform) {
 

@@ -26,7 +26,6 @@ private:
     int u_modelToWorld;
     int u_worldToCamera;
     int u_cameraToView;
-    int u_light;
     QMatrix4x4 m_projection;
     Camera3D m_camera;
     Transform3D m_transform;

@@ -55,7 +55,12 @@ public:
         GLint topNbPoints, GLint middleNbPoints, GLint bottomNbPoints, GLint topComplexity, GLint bottomComplexity,
         QColor color);
     ~Gem();
-    void initializeBuffer(QOpenGLShaderProgram *shaderProgram);
+    void initializeBuffer(QOpenGLShaderProgram *shaderProgram,bool init);
+
+
+    void modif(GLfloat topHeight, GLfloat bottomHeight, GLfloat topRadius, GLfloat middleRadius, GLfloat bottomRadius,
+                    GLint topNbPoints, GLint middleNbPoints, GLint bottomNbPoints, GLint topComplexity, GLint bottomComplexity,
+                    QColor color);
     void drawShape(QOpenGLShaderProgram *shaderProgram, int u_modelToWorld, Transform3D m_transform);
 
     GLfloat getTopHeight() const;

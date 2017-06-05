@@ -29,8 +29,6 @@ void DisplayWidget::initializeGL() {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    glEnable(GL_TEXTURE_2D);
-
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
     shaderProgram = new QOpenGLShaderProgram();
@@ -45,7 +43,7 @@ void DisplayWidget::initializeGL() {
     u_cameraToView = shaderProgram->uniformLocation("cameraToView");
     shaderProgram->release();
 
-    gem->initializeBuffer(shaderProgram);
+    gem->initializeBuffer(shaderProgram,true);
 
 
 
@@ -114,7 +112,6 @@ void DisplayWidget::update() {
         {
             translation += m_camera.up();
         }
-
         if (Input::keyPressed(Qt::Key_L))
         {
             lumiere.pos.setZ(m_camera.translation().z()) ;
@@ -169,10 +166,10 @@ void DisplayWidget::updateGem(GLfloat topHeight, GLfloat bottomHeight, GLfloat t
                               GLfloat bottomRadius, GLint topNbPoints, GLint middleNbPoints, GLint bottomNbPoints,
                               GLint topComplexity, GLint bottomComplexity, QColor color) {
 
-//    gem = new Gem(topHeight, bottomHeight, topRadius, middleRadius, bottomRadius, topNbPoints, middleNbPoints,
-//                  bottomNbPoints, topComplexity, bottomComplexity, color);
-//    this->initializeGL();
-//    gem->initializeBuffer(shaderProgram);
+    gem->modif(topHeight, bottomHeight, topRadius, middleRadius, bottomRadius, topNbPoints, middleNbPoints,
+                  bottomNbPoints, topComplexity, bottomComplexity, color);
+
+    gem->initializeBuffer(shaderProgram,false);
 
 }
 
