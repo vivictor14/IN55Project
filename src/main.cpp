@@ -23,7 +23,7 @@ int main(int argv, char **args) {
     window.setCentralWidget(displayWidget);
     window.setMenuWidget(menuWidget);
 
-    window.resize(QSize(800, 600));
+    window.resize(QSize(1080, 720));
     window.show();
 
     return app.exec();

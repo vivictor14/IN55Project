@@ -36,7 +36,6 @@ private:
     QOpenGLVertexArrayObject *vao;
 
     void calculateInnerMiddleRadius();
-    float calculateComplexityCircleRadius(GLfloat height, GLfloat radius, GLint nbPoints, GLint complexity, int index);
     void initVertices(QVector3D color);
     void mapping();
     Vertex *initFaceVertices(bool counterClockWise, GLfloat height, GLfloat radius, GLint nbPoints, GLint Complexity, QVector3D color);
@@ -58,9 +57,11 @@ public:
     void initializeBuffer(QOpenGLShaderProgram *shaderProgram,bool init);
 
 
-    void modif(GLfloat topHeight, GLfloat bottomHeight, GLfloat topRadius, GLfloat middleRadius, GLfloat bottomRadius,
-                    GLint topNbPoints, GLint middleNbPoints, GLint bottomNbPoints, GLint topComplexity, GLint bottomComplexity,
-                    QColor color);
+    void initGem(GLfloat topHeight, GLfloat bottomHeight, GLfloat topRadius, GLfloat middleRadius,
+                 GLfloat bottomRadius,
+                 GLint topNbPoints, GLint middleNbPoints, GLint bottomNbPoints, GLint topComplexity,
+                 GLint bottomComplexity,
+                 QColor color);
     void drawShape(QOpenGLShaderProgram *shaderProgram, int u_modelToWorld, Transform3D m_transform);
 
     GLfloat getTopHeight() const;

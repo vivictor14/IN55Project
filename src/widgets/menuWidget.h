@@ -12,6 +12,7 @@
 #include <QPushButton>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QGridLayout>
+#include <QtWidgets/QCheckBox>
 #include "displayWidget.h"
 
 class MenuWidget : public QWidget {
@@ -34,6 +35,7 @@ private:
     QLabel *bottomNbPointsLabel;
     QLabel *topComplexityLabel;
     QLabel *bottomComplexityLabel;
+
     QSlider *topHeightSlider;
     QSlider *bottomHeightSlider;
     QSlider *topRadiusSlider;
@@ -46,6 +48,7 @@ private:
     QSlider *bottomComplexitySlider;
     QPushButton *colorButton;
     QColorDialog *colorDialog;
+    QCheckBox *autoRotateCheckBox;
 
     QLayout *createLayout();
     void initMenu();

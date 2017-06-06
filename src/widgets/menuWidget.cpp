@@ -26,6 +26,7 @@ MenuWidget::MenuWidget(DisplayWidget *displayWidget) {
     bottomNbPointsSlider = new QSlider(Qt::Horizontal, this);
     topComplexitySlider = new QSlider(Qt::Horizontal, this);
     bottomComplexitySlider = new QSlider(Qt::Horizontal, this);
+    autoRotateCheckBox = new QCheckBox("Rotation auto");
 
     colorButton = new QPushButton();
     colorDialog = new QColorDialog();
@@ -62,6 +63,7 @@ QLayout *MenuWidget::createLayout() {
     gLayout->addWidget(middleRadiusSlider, 2, 1);
     gLayout->addWidget(middleNbPointsLabel, 2, 2);
     gLayout->addWidget(middleNbPointsSlider, 2, 3);
+    gLayout->addWidget(autoRotateCheckBox, 2, 6);
 
     gLayout->addWidget(colorButton, 2, 7);
 
@@ -133,6 +135,9 @@ void MenuWidget::initMenu() {
 
     QWidget::connect(colorButton, SIGNAL(clicked()), colorDialog, SLOT(open()));
     QWidget::connect(colorDialog, SIGNAL(accepted()), this, SLOT(changeColor()));
+
+    autoRotateCheckBox->setChecked(displayWidget->isAutoRotate());
+    QWidget::connect(autoRotateCheckBox, SIGNAL(stateChanged(int)), displayWidget, SLOT(triggerAutoRotation(int)));
 
     setParametersLabelText();
 }

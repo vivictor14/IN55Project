@@ -23,6 +23,7 @@ private:
 
     Gem *gem;
     QOpenGLShaderProgram *shaderProgram;
+    bool autoRotate = false;
     int u_modelToWorld;
     int u_worldToCamera;
     int u_cameraToView;
@@ -52,6 +53,8 @@ public:
 
     Gem *getGem() const;
 
+    bool isAutoRotate() const;
+
 protected:
     void keyPressEvent(QKeyEvent *event);
     void keyReleaseEvent(QKeyEvent *event);
@@ -61,6 +64,7 @@ protected:
 protected slots:
 
     void update();
+    void triggerAutoRotation(int autoRotate);
 
 };
 

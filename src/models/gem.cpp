@@ -4,20 +4,9 @@ Gem::Gem(GLfloat topHeight, GLfloat bottomHeight, GLfloat topRadius, GLfloat mid
          GLint topNbPoints, GLint middleNbPoints, GLint bottomNbPoints, GLint topComplexity, GLint bottomComplexity,
          QColor color) {
 
-    this->topHeight = topHeight;
-    this->bottomHeight = -bottomHeight;
-    this->topRadius = topRadius;
-    this->middleRadius = middleRadius;
-    this->bottomRadius = bottomRadius;
-    this->topNbPoints = topNbPoints;
-    this->middleNbPoints = middleNbPoints;
-    this->bottomNbPoints = bottomNbPoints;
-    this->topComplexity = topComplexity;
-    this->bottomComplexity = bottomComplexity;
-    this->color = color;
+    initGem(topHeight, bottomHeight, topRadius, middleRadius, bottomRadius, topNbPoints, middleNbPoints,
+                 bottomNbPoints, topComplexity, bottomComplexity, color);
 
-    initVertices(QVector3D(color.red() / 255.0f, color.green() / 255.0f, color.blue() / 255.0f));
-    mapping();
 }
 
 Gem::~Gem() {
@@ -27,9 +16,11 @@ Gem::~Gem() {
     }
 }
 
-void Gem::modif(GLfloat topHeight, GLfloat bottomHeight, GLfloat topRadius, GLfloat middleRadius, GLfloat bottomRadius,
-GLint topNbPoints, GLint middleNbPoints, GLint bottomNbPoints, GLint topComplexity, GLint bottomComplexity,
-        QColor color) {
+void Gem::initGem(GLfloat topHeight, GLfloat bottomHeight, GLfloat topRadius, GLfloat middleRadius,
+                  GLfloat bottomRadius,
+                  GLint topNbPoints, GLint middleNbPoints, GLint bottomNbPoints, GLint topComplexity,
+                  GLint bottomComplexity,
+                  QColor color) {
 
     this->topHeight = topHeight;
     this->bottomHeight = -bottomHeight;
@@ -75,23 +66,6 @@ void Gem::calculateInnerMiddleRadius() {
 
 }
 
-float Gem::calculateComplexityCircleRadius(GLfloat height, GLfloat radius, GLint nbPoints, GLint complexity, int index) {
-
-    float k = index / (float)(complexity);
-//    QVector3D A = QVector3D(radius, height, 0);
-//    QVector3D B = QVector3D((float) (middleRadius * cos(2 * M_PI / nbPoints)), 0,
-//                            (float) (middleRadius * sin(2 * M_PI / nbPoints)));
-//    QVector3D u = A - B;
-//    QVector3D M = QVector3D(k * u.x() + B.x(), k * u.y() + B.y(), k * u.z() + B.z());
-//
-//    QVector3D test = QVector3D(0, k * height, 0);
-//    float rep = M.distanceToPoint(test);
-//
-//    return M.distanceToPoint(QVector3D(0, k * height, 0));
-    return innerMiddleRadius - (innerMiddleRadius - radius) * k;
-
-}
-
 Vertex *Gem::initFaceVertices(bool counterClockWise, GLfloat height, GLfloat radius, GLint nbPoints, GLint complexity, QVector3D color) {
 
     Vertex *vertices;
@@ -110,7 +84,7 @@ Vertex *Gem::initFaceVertices(bool counterClockWise, GLfloat height, GLfloat rad
     for (int i = 0; i < complexity - culet; i++) {
 
         offset = (i + 1) * angle / 2;
-        float complexityCircleRadius = calculateComplexityCircleRadius(height, radius, nbPoints, complexity, i + 1);
+        float complexityCircleRadius = innerMiddleRadius - (innerMiddleRadius - radius) * (i + 1) / (float)complexity;
 
 
         for (int j = 0; j < nbPoints; j++) {
@@ -184,52 +158,20 @@ void Gem::mapping() {
 
 void Gem::tableMapping(VerticesMapping *mapping, Vertex *vertices, GLint nbPoints, GLint complexity) {
     
-//    mapping->mode = GL_TRIANGLE_FAN;
-//    mapping->length = nbPoints;
-//    mapping->vertices = new Vertex[nbPoints];
-//
-//    for(int i = 0; i < nbPoints; i++) {
-//
-//        mapping->vertices[i] = vertices[(complexity * (nbPoints - 1)) - i];
-//
-//    }
-
     mapping->mode = GL_TRIANGLES;
-    mapping->length = nbPoints *3 ;
+    mapping->length = nbPoints * 3 ;
     mapping->vertices = new Vertex[mapping->length];
 
 
     for(int i = 0; i < nbPoints; i++) {
 
-        mapping->vertices[3*i] = vertices[(complexity * nbPoints - 1) - 0];
-        mapping->vertices[3*i+1] = vertices[(complexity * nbPoints - 1) - (i+1)%nbPoints];
-        mapping->vertices[3*i+2] = vertices[(complexity * nbPoints - 1) - (i+2)%nbPoints];
+        mapping->vertices[3 * i] = vertices[complexity * nbPoints - 1];
+        mapping->vertices[3 * i + 1] = vertices[(complexity * nbPoints - 1) - (i + 1) % nbPoints];
+        mapping->vertices[3 * i + 2] = vertices[(complexity * nbPoints - 1) - (i + 2) % nbPoints];
     }
 }
 
 void Gem::pavilionMapping(VerticesMapping *mapping, Vertex *vertices, GLint complexity, bool clockWise) {
-
-//    mapping->mode = GL_TRIANGLE_FAN;
-//    mapping->length  = middleNbPoints + 2;
-//    mapping->vertices = new Vertex[middleNbPoints + 2];
-//    mapping->vertices[0] = vertices[middleNbPoints * (complexity - 1)];
-//    if(complexity > 1) {
-//        for (int i = 0; i <= middleNbPoints; i++) {
-//
-//            mapping->vertices[i + 1] = vertices[(complexity - 1) * middleNbPoints - 1 - i % middleNbPoints];
-//
-//        }
-//    }
-//    else {
-//        for (int i = 0; i <= middleNbPoints; i++) {
-//            if(clockWise) {
-//                mapping->vertices[i + 1] = middleVertices[i % middleNbPoints];
-//            }
-//            else {
-//                mapping->vertices[i + 1] = middleVertices[(middleNbPoints - 1) - i % middleNbPoints];
-//            }
-//        }
-//    }
 
     mapping->mode = GL_TRIANGLES;
     mapping->length  = (middleNbPoints + 2)*3;
@@ -240,7 +182,7 @@ void Gem::pavilionMapping(VerticesMapping *mapping, Vertex *vertices, GLint comp
 
             mapping->vertices[3 * i] = vertices[middleNbPoints * (complexity - 1)];
             mapping->vertices[3 * i + 1] = vertices[(complexity - 1) * middleNbPoints - 1 - i % middleNbPoints];
-            mapping->vertices[3 * i + 2] = vertices[(complexity - 1) * middleNbPoints - 1 - (i+1) % middleNbPoints];
+            mapping->vertices[3 * i + 2] = vertices[(complexity - 1) * middleNbPoints - 1 - (i + 1) % middleNbPoints];
 
         }
     }
@@ -249,12 +191,12 @@ void Gem::pavilionMapping(VerticesMapping *mapping, Vertex *vertices, GLint comp
             if(clockWise) {
                 mapping->vertices[3 * i] = vertices[middleNbPoints * (complexity - 1)];
                 mapping->vertices[3 * i + 1] = middleVertices[i % middleNbPoints];
-                mapping->vertices[3 * i + 2] = middleVertices[(i+1) % middleNbPoints];
+                mapping->vertices[3 * i + 2] = middleVertices[(i + 1) % middleNbPoints];
             }
             else {
                 mapping->vertices[3 * i] = vertices[middleNbPoints * (complexity - 1)];
                 mapping->vertices[3 * i + 1] = middleVertices[(middleNbPoints - 1) - i % middleNbPoints];
-                mapping->vertices[3 * i + 2] = middleVertices[(middleNbPoints - 1) - (i+1) % middleNbPoints];
+                mapping->vertices[3 * i + 2] = middleVertices[(middleNbPoints - 1) - (i + 1) % middleNbPoints];
             }
         }
     }
@@ -298,36 +240,78 @@ void Gem::bezelMapping(VerticesMapping *mapping, Vertex *vertices, GLint nbPoint
 void Gem::upperGirdleMapping(VerticesMapping *mapping, Vertex *vertices, GLint nbPoints, GLint complexity, bool clockWise) {
 
     mapping->mode = GL_TRIANGLES;
-    mapping->length = (1 + (complexity > 1)) * 3 * nbPoints + 3 * middleNbPoints;
+    mapping->length = (2 + (complexity > 1)) * 3 * nbPoints + 6 * middleNbPoints;
     mapping->vertices = new Vertex[mapping->length];
+    int startIndex = 0;
+
+    for(int i = 0; i < nbPoints; i++) {
+
+        if(clockWise) {
+            mapping->vertices[3 * i] = vertices[nbPoints - 1 - i];
+            mapping->vertices[3 * i + 1] = middleVertices[(middleNbPoints - 1 + (int) round((i + 1) * middleNbPoints / (float) nbPoints)) % middleNbPoints];
+            mapping->vertices[3 * i + 2] = middleVertices[(int) round((i + 1) * middleNbPoints / (float) nbPoints) % middleNbPoints];
+        }
+        else {
+            mapping->vertices[3 * i] = vertices[i];
+            mapping->vertices[3 * i + 1] = middleVertices[(int) round((i + 1) * middleNbPoints / (float) nbPoints) % middleNbPoints];
+            mapping->vertices[3 * i + 2] = middleVertices[(middleNbPoints - 1 + (int) round((i + 1) * middleNbPoints / (float) nbPoints)) % middleNbPoints];
+        }
+
+    }
+
+    startIndex = 3 * nbPoints;
+
+    if(complexity == 1) {
+        for (int i = 0; i < middleNbPoints; i++) {
+
+            if (clockWise) {
+                mapping->vertices[startIndex + 3 * i] = middleVertices[middleNbPoints - 1 - i];
+                mapping->vertices[startIndex + 3 * i + 1] = vertices[
+                        (int) round((i + 1) * nbPoints / (float) middleNbPoints) - 1];
+                mapping->vertices[startIndex + 3 * i + 2] = vertices[
+                        (int) round((i + 1) * nbPoints / (float) middleNbPoints) % nbPoints];
+            } else {
+                mapping->vertices[startIndex + 3 * i] = middleVertices[(i + 1) % middleNbPoints];
+                mapping->vertices[startIndex + 3 * i + 2] = vertices[
+                        (int) round((i + 1) * nbPoints / (float) middleNbPoints) % nbPoints];
+                mapping->vertices[startIndex + 3 * i + 1] = vertices[
+                        (int) round((i + 1) * nbPoints / (float) middleNbPoints) - 1];
+            }
+
+        }
+    }
+
+    startIndex = 3 * nbPoints + 3 * middleNbPoints;
 
     for(int i = 0; i < middleNbPoints; i++) {
 
         if(clockWise){
-            mapping->vertices[3 * i] = middleVertices[i];
-            mapping->vertices[3 * i + 1] = middleVertices[(i + 1) % middleNbPoints];
-            mapping->vertices[3 * i + 2] = vertices[nbPoints - 1 - (i * nbPoints / middleNbPoints)];
+            mapping->vertices[startIndex + 3 * i] = middleVertices[i];
+            mapping->vertices[startIndex + 3 * i + 1] = middleVertices[(i + 1) % middleNbPoints];
+            mapping->vertices[startIndex + 3 * i + 2] = vertices[nbPoints - 1 - (int)round(i * nbPoints / (float)middleNbPoints) % nbPoints];
         }
         else {
-            mapping->vertices[3 * i] = middleVertices[(i + 1) % middleNbPoints];
-            mapping->vertices[3 * i + 1] = middleVertices[i];
-            mapping->vertices[3 * i + 2] = vertices[i * nbPoints / middleNbPoints];
+            mapping->vertices[startIndex + 3 * i] = middleVertices[(i + 1) % middleNbPoints];
+            mapping->vertices[startIndex + 3 * i + 1] = middleVertices[i];
+            mapping->vertices[startIndex + 3 * i + 2] = vertices[(int)round(i * nbPoints / (float)middleNbPoints) % nbPoints];
         }
 
     }
+
+    startIndex = 3 * nbPoints + 6 * middleNbPoints;
 
     if(complexity == 1) {
         for (int i = 0; i < nbPoints; i++) {
 
             if(clockWise) {
-                mapping->vertices[3 * middleNbPoints + 3 * i] = vertices[i];
-                mapping->vertices[3 * middleNbPoints + 3 * i + 1] = vertices[(i + 1) % nbPoints];
-                mapping->vertices[3 * middleNbPoints + 3 * i + 2] = middleVertices[nbPoints - 1 - (i * middleNbPoints / nbPoints)];
+                mapping->vertices[startIndex + 3 * i] = vertices[nbPoints - 1 - i];
+                mapping->vertices[startIndex + 3 * i + 1] = vertices[(nbPoints - i) % nbPoints];
+                mapping->vertices[startIndex + 3 * i + 2] = middleVertices[((int)round(i * middleNbPoints / (float)nbPoints)) % middleNbPoints];
             }
             else {
-                mapping->vertices[3 * middleNbPoints + 3 * i] = vertices[(nbPoints + i - 1) % nbPoints ];
-                mapping->vertices[3 * middleNbPoints + 3 * i + 1] = vertices[i];
-                mapping->vertices[3 * middleNbPoints + 3 * i + 2] = middleVertices[i * middleNbPoints / nbPoints];
+                mapping->vertices[startIndex + 3 * i] = vertices[(nbPoints + i - 1) % nbPoints ];
+                mapping->vertices[startIndex + 3 * i + 1] = vertices[i];
+                mapping->vertices[startIndex + 3 * i + 2] = middleVertices[((int)round(i * middleNbPoints / (float)nbPoints)) % middleNbPoints];
             }
 
         }
@@ -337,20 +321,20 @@ void Gem::upperGirdleMapping(VerticesMapping *mapping, Vertex *vertices, GLint n
         for (int i = 0; i < nbPoints; i++) {
 
             if(clockWise) {
-                mapping->vertices[3 * middleNbPoints + 6 * i] = vertices[nbPoints + i];
-                mapping->vertices[3 * middleNbPoints + 6 * i + 1] = vertices[(i + 1) % nbPoints];
-                mapping->vertices[3 * middleNbPoints + 6 * i + 2] = middleVertices[nbPoints - 1 - (i * middleNbPoints / nbPoints)];
-                mapping->vertices[3 * middleNbPoints + 6 * i + 3] = middleVertices[nbPoints - 1 - (i * middleNbPoints / nbPoints)];
-                mapping->vertices[3 * middleNbPoints + 6 * i + 4] = vertices[i];
-                mapping->vertices[3 * middleNbPoints + 6 * i + 5] = vertices[nbPoints + i];
+                mapping->vertices[startIndex + 6 * i] = vertices[nbPoints + (nbPoints - i - 1) % nbPoints];
+                mapping->vertices[startIndex + 6 * i + 1] = vertices[(nbPoints - i) % nbPoints];
+                mapping->vertices[startIndex + 6 * i + 2] = middleVertices[(int)round(i * middleNbPoints / (float)nbPoints) % middleNbPoints];
+                mapping->vertices[startIndex + 6 * i + 3] = middleVertices[(int)round(i * middleNbPoints / (float)nbPoints) % middleNbPoints];
+                mapping->vertices[startIndex + 6 * i + 4] = vertices[nbPoints - 1 - i];
+                mapping->vertices[startIndex + 6 * i + 5] = vertices[nbPoints + (nbPoints - i - 1) % nbPoints];
             }
             else {
-                mapping->vertices[3 * middleNbPoints + 6 * i] = vertices[nbPoints + (nbPoints + i - 1) % nbPoints];
-                mapping->vertices[3 * middleNbPoints + 6 * i + 1] = vertices[i];
-                mapping->vertices[3 * middleNbPoints + 6 * i + 2] = middleVertices[i * middleNbPoints / nbPoints];
-                mapping->vertices[3 * middleNbPoints + 6 * i + 3] = middleVertices[i * middleNbPoints / nbPoints];
-                mapping->vertices[3 * middleNbPoints + 6 * i + 4] = vertices[(nbPoints + i - 1) % nbPoints];
-                mapping->vertices[3 * middleNbPoints + 6 * i + 5] = vertices[nbPoints + (nbPoints + i - 1) % nbPoints];
+                mapping->vertices[startIndex + 6 * i] = vertices[nbPoints + (nbPoints + i - 1) % nbPoints];
+                mapping->vertices[startIndex + 6 * i + 1] = vertices[i];
+                mapping->vertices[startIndex + 6 * i + 2] = middleVertices[(int)round(i * middleNbPoints / (float)nbPoints) % middleNbPoints];
+                mapping->vertices[startIndex + 6 * i + 3] = middleVertices[(int)round(i * middleNbPoints / (float)nbPoints) % middleNbPoints];
+                mapping->vertices[startIndex + 6 * i + 4] = vertices[(nbPoints + i - 1) % nbPoints];
+                mapping->vertices[startIndex + 6 * i + 5] = vertices[nbPoints + (nbPoints + i - 1) % nbPoints];
             }
 
         }

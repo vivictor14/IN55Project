@@ -76,53 +76,60 @@ void DisplayWidget::update() {
     // Update input
     Input::update();
 
+
     // Camera Transformation
     if (Input::buttonPressed(Qt::RightButton))
     {
-        static const float transSpeed = 0.5f;
+
         static const float rotSpeed   = 0.5f;
 
         // Handle rotations
         m_camera.rotate(-rotSpeed * Input::mouseDelta().x(), Camera3D::LocalUp);
         m_camera.rotate(-rotSpeed * Input::mouseDelta().y(), m_camera.right());
 
-        // Handle translations
-        QVector3D translation;
-        if (Input::keyPressed(Qt::Key_Z))
-        {
-            translation += m_camera.forward();
-        }
-        if (Input::keyPressed(Qt::Key_S))
-        {
-            translation -= m_camera.forward();
-        }
-        if (Input::keyPressed(Qt::Key_Q))
-        {
-            translation -= m_camera.right();
-        }
-        if (Input::keyPressed(Qt::Key_D))
-        {
-            translation += m_camera.right();
-        }
-        if (Input::keyPressed(Qt::Key_A))
-        {
-            translation -= m_camera.up();
-        }
-        if (Input::keyPressed(Qt::Key_E))
-        {
-            translation += m_camera.up();
-        }
-        if (Input::keyPressed(Qt::Key_L))
-        {
-            lumiere.pos.setZ(m_camera.translation().z()) ;
-            lumiere.pos.setY(m_camera.translation().y()) ;
-            lumiere.pos.setX(m_camera.translation().x()) ;
-        }
-        m_camera.translate(transSpeed * translation);
+
     }
 
+    static const float transSpeed = 0.5f;
+
+    // Handle translations
+    QVector3D translation;
+    if (Input::keyPressed(Qt::Key_Z))
+    {
+        translation += m_camera.forward();
+    }
+    if (Input::keyPressed(Qt::Key_S))
+    {
+        translation -= m_camera.forward();
+    }
+    if (Input::keyPressed(Qt::Key_Q))
+    {
+        translation -= m_camera.right();
+    }
+    if (Input::keyPressed(Qt::Key_D))
+    {
+        translation += m_camera.right();
+    }
+    if (Input::keyPressed(Qt::Key_A))
+    {
+        translation -= m_camera.up();
+    }
+    if (Input::keyPressed(Qt::Key_E))
+    {
+        translation += m_camera.up();
+    }
+    if (Input::keyPressed(Qt::Key_L))
+    {
+        lumiere.pos.setZ(m_camera.translation().z()) ;
+        lumiere.pos.setY(m_camera.translation().y()) ;
+        lumiere.pos.setX(m_camera.translation().x()) ;
+    }
+    m_camera.translate(transSpeed * translation);
+
     // Update instance information
-    m_transform.rotate(1.0f, QVector3D(0.4f, 0.3f, 0.3f));
+    if(autoRotate) {
+        m_transform.rotate(1.0f, QVector3D(0.4f, 0.3f, 0.3f));
+    }
 
     // Schedule a redraw
     QOpenGLWidget::update();
@@ -166,13 +173,23 @@ void DisplayWidget::updateGem(GLfloat topHeight, GLfloat bottomHeight, GLfloat t
                               GLfloat bottomRadius, GLint topNbPoints, GLint middleNbPoints, GLint bottomNbPoints,
                               GLint topComplexity, GLint bottomComplexity, QColor color) {
 
-    gem->modif(topHeight, bottomHeight, topRadius, middleRadius, bottomRadius, topNbPoints, middleNbPoints,
-                  bottomNbPoints, topComplexity, bottomComplexity, color);
+    gem->initGem(topHeight, bottomHeight, topRadius, middleRadius, bottomRadius, topNbPoints, middleNbPoints,
+                 bottomNbPoints, topComplexity, bottomComplexity, color);
 
-    gem->initializeBuffer(shaderProgram,false);
+    gem->initializeBuffer(shaderProgram, false);
 
 }
 
 Gem *DisplayWidget::getGem() const {
     return gem;
 }
+
+void DisplayWidget::triggerAutoRotation(int autoRotate) {
+    this->autoRotate = (bool) autoRotate;
+}
+
+bool DisplayWidget::isAutoRotate() const {
+    return autoRotate;
+}
+
+
