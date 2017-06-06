@@ -8,7 +8,7 @@ DisplayWidget::DisplayWidget() {
     lumiere.ambiant = {0.5f, 0.5f, 0.5f, 1.0f };
     lumiere.specular = {0.0f, 0.0f, 1.0f, 1.0f };
     lumiere.diffuse = {0.5f, 0.5f, 0.5f, 1.0f };
-    gem = new Gem(2, 4, 4, 6, 4, 8, 8, 8, 5, 5, QColor("red"));
+    gem = new Gem(2, 4, 4, 6, 4, 8, 8, 8, 5, 5, 100, 100, QColor("red"));
 }
 
 DisplayWidget::~DisplayWidget() {
@@ -43,9 +43,7 @@ void DisplayWidget::initializeGL() {
     u_cameraToView = shaderProgram->uniformLocation("cameraToView");
     shaderProgram->release();
 
-    gem->initializeBuffer(shaderProgram,true);
-
-
+    gem->initializeBuffer(shaderProgram, &m_transform, true);
 
 }
 
@@ -171,12 +169,12 @@ void DisplayWidget::mouseReleaseEvent(QMouseEvent *event)
 
 void DisplayWidget::updateGem(GLfloat topHeight, GLfloat bottomHeight, GLfloat topRadius, GLfloat middleRadius,
                               GLfloat bottomRadius, GLint topNbPoints, GLint middleNbPoints, GLint bottomNbPoints,
-                              GLint topComplexity, GLint bottomComplexity, QColor color) {
+                              GLint topComplexity, GLint bottomComplexity, GLint lengthStretchingPercent, GLint widthStretchingPercent, QColor color) {
 
     gem->initGem(topHeight, bottomHeight, topRadius, middleRadius, bottomRadius, topNbPoints, middleNbPoints,
-                 bottomNbPoints, topComplexity, bottomComplexity, color);
+                 bottomNbPoints, topComplexity, bottomComplexity, lengthStretchingPercent, widthStretchingPercent, color);
 
-    gem->initializeBuffer(shaderProgram, false);
+    gem->initializeBuffer(shaderProgram, &m_transform, false);
 
 }
 

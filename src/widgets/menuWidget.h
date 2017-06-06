@@ -35,6 +35,9 @@ private:
     QLabel *bottomNbPointsLabel;
     QLabel *topComplexityLabel;
     QLabel *bottomComplexityLabel;
+    QLabel *lengthStretchingPercentLabel;
+    QLabel *widthStretchingPercentLabel;
+    QLabel *templateLabel;
 
     QSlider *topHeightSlider;
     QSlider *bottomHeightSlider;
@@ -46,12 +49,27 @@ private:
     QSlider *bottomNbPointsSlider;
     QSlider *topComplexitySlider;
     QSlider *bottomComplexitySlider;
+    QSlider *lengthStretchingPercentSlider;
+    QSlider *widthStretchingPercentSlider;
     QPushButton *colorButton;
     QColorDialog *colorDialog;
     QCheckBox *autoRotateCheckBox;
 
+    QPushButton *dropTemplateButton;
+    QPushButton *triangleTemplateButton;
+    QPushButton *brilliantTemplateButton;
+    QPushButton *marquiseTemplateButton;
+    QPushButton *princessTemplateButton;
+    QPushButton *ovalTemplateButton;
+    QPushButton *hexagonTemplateButton;
+
     QLayout *createLayout();
+    void initSlider(QSlider *slider, int minimum, int maximum);
+    void initTemplateButton(QPushButton *templateButton, QString name, QString imagePath);
     void initMenu();
+    void updateToolTips();
+    void updateControls();
+    void updateSlider(QSlider *slider, int value);
     void setParametersLabelText();
 
 public:
@@ -62,6 +80,13 @@ protected slots:
 
     void updateGem(int);
     void changeColor();
+    void applyDropTemplate();
+    void applyTriangleTemplate();
+    void applyBrilliantTemplate();
+    void applyMarquiseTemplate();
+    void applyPrincessTemplate();
+    void applyOvalTemplate();
+    void applyHexagonTemplate();
 
 };
 

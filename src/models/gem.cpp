@@ -2,10 +2,10 @@
 
 Gem::Gem(GLfloat topHeight, GLfloat bottomHeight, GLfloat topRadius, GLfloat middleRadius, GLfloat bottomRadius,
          GLint topNbPoints, GLint middleNbPoints, GLint bottomNbPoints, GLint topComplexity, GLint bottomComplexity,
-         QColor color) {
+         GLint lengthStretchingPercent, GLint widthStretchingPercent, QColor color) {
 
-    initGem(topHeight, bottomHeight, topRadius, middleRadius, bottomRadius, topNbPoints, middleNbPoints,
-                 bottomNbPoints, topComplexity, bottomComplexity, color);
+    initGem(topHeight, bottomHeight, topRadius, middleRadius, bottomRadius, topNbPoints, middleNbPoints, bottomNbPoints,
+            topComplexity, bottomComplexity, lengthStretchingPercent, widthStretchingPercent, color);
 
 }
 
@@ -20,7 +20,10 @@ void Gem::initGem(GLfloat topHeight, GLfloat bottomHeight, GLfloat topRadius, GL
                   GLfloat bottomRadius,
                   GLint topNbPoints, GLint middleNbPoints, GLint bottomNbPoints, GLint topComplexity,
                   GLint bottomComplexity,
-                  QColor color) {
+                  GLint lengthStretchingPercent, GLint widthStretchingPercent, QColor color) {
+
+    this->previousLengthStretchingPercent = this->lengthStretchingPercent;
+    this->previousWidthStretchingPercent = this->widthStretchingPercent;
 
     this->topHeight = topHeight;
     this->bottomHeight = -bottomHeight;
@@ -32,6 +35,8 @@ void Gem::initGem(GLfloat topHeight, GLfloat bottomHeight, GLfloat topRadius, GL
     this->bottomNbPoints = bottomNbPoints;
     this->topComplexity = topComplexity;
     this->bottomComplexity = bottomComplexity;
+    this->lengthStretchingPercent = lengthStretchingPercent;
+    this->widthStretchingPercent = widthStretchingPercent;
     this->color = color;
 
     initVertices(QVector3D(color.red() / 255.0f, color.green() / 255.0f, color.blue() / 255.0f));
@@ -266,16 +271,12 @@ void Gem::upperGirdleMapping(VerticesMapping *mapping, Vertex *vertices, GLint n
 
             if (clockWise) {
                 mapping->vertices[startIndex + 3 * i] = middleVertices[middleNbPoints - 1 - i];
-                mapping->vertices[startIndex + 3 * i + 1] = vertices[
-                        (int) round((i + 1) * nbPoints / (float) middleNbPoints) - 1];
-                mapping->vertices[startIndex + 3 * i + 2] = vertices[
-                        (int) round((i + 1) * nbPoints / (float) middleNbPoints) % nbPoints];
+                mapping->vertices[startIndex + 3 * i + 1] = vertices[(int) round((i + 1) * nbPoints / (float) middleNbPoints) - 1];
+                mapping->vertices[startIndex + 3 * i + 2] = vertices[(int) round((i + 1) * nbPoints / (float) middleNbPoints) % nbPoints];
             } else {
                 mapping->vertices[startIndex + 3 * i] = middleVertices[(i + 1) % middleNbPoints];
-                mapping->vertices[startIndex + 3 * i + 2] = vertices[
-                        (int) round((i + 1) * nbPoints / (float) middleNbPoints) % nbPoints];
-                mapping->vertices[startIndex + 3 * i + 1] = vertices[
-                        (int) round((i + 1) * nbPoints / (float) middleNbPoints) - 1];
+                mapping->vertices[startIndex + 3 * i + 2] = vertices[(int) round((i + 1) * nbPoints / (float) middleNbPoints) % nbPoints];
+                mapping->vertices[startIndex + 3 * i + 1] = vertices[(int) round((i + 1) * nbPoints / (float) middleNbPoints) - 1];
             }
 
         }
@@ -346,130 +347,54 @@ void Gem::upperGirdleMapping(VerticesMapping *mapping, Vertex *vertices, GLint n
 
 }
 
-void Gem::initializeBuffer(QOpenGLShaderProgram *shaderProgram,bool init) {
+void Gem::initializeBuffer(QOpenGLShaderProgram *shaderProgram, Transform3D *m_transform, bool init) {
 
     initializeOpenGLFunctions();
 
+    shaderProgram->bind();
+
     if(init) {
-        shaderProgram->bind();
         vbo = new QOpenGLBuffer[8];
         vao = new QOpenGLVertexArrayObject[8];
     }
 
-//    vbo[0].create();
-//    vbo[0].bind();
-//    vbo[0].setUsagePattern(QOpenGLBuffer::StaticDraw);
-//    vbo[0].allocate(topVertices, topComplexity * topNbPoints * sizeof(Vertex));
-//
-//    vao[0].create();
-//    vao[0].bind();
-//    shaderProgram->enableAttributeArray(0);
-//    shaderProgram->enableAttributeArray(1);
-//    shaderProgram->setAttributeBuffer(0, GL_FLOAT, Vertex::positionOffset(), Vertex::PositionTupleSize, Vertex::stride());
-//    shaderProgram->setAttributeBuffer(1, GL_FLOAT, Vertex::colorOffset(), Vertex::ColorTupleSize, Vertex::stride());
-//
-//    vao[0].release();
-//    vbo[0].release();
-//
-//    vbo[1].create();
-//    vbo[1].bind();
-//    vbo[1].setUsagePattern(QOpenGLBuffer::StaticDraw);
-//    vbo[1].allocate(bottomVertices, ((bottomComplexity - 1) * middleNbPoints + 1) * sizeof(Vertex));
-//
-//    vao[1].create();
-//    vao[1].bind();
-//    shaderProgram->enableAttributeArray(0);
-//    shaderProgram->enableAttributeArray(1);
-//    shaderProgram->setAttributeBuffer(0, GL_FLOAT, Vertex::positionOffset(), Vertex::PositionTupleSize, Vertex::stride());
-//    shaderProgram->setAttributeBuffer(1, GL_FLOAT, Vertex::colorOffset(), Vertex::ColorTupleSize, Vertex::stride());
-//
-//    vao[1].release();
-//    vbo[1].release();
-//
-//    vbo[2].create();
-//    vbo[2].bind();
-//    vbo[2].setUsagePattern(QOpenGLBuffer::StaticDraw);
-//    vbo[2].allocate(middleVertices, middleNbPoints * sizeof(Vertex));
-//
-//    vao[2].create();
-//    vao[2].bind();
-//    shaderProgram->enableAttributeArray(0);
-//    shaderProgram->enableAttributeArray(1);
-//    shaderProgram->setAttributeBuffer(0, GL_FLOAT, Vertex::positionOffset(), Vertex::PositionTupleSize, Vertex::stride());
-//    shaderProgram->setAttributeBuffer(1, GL_FLOAT, Vertex::colorOffset(), Vertex::ColorTupleSize, Vertex::stride());
-//
-//    vao[2].release();
-//    vbo[2].release();
-
+    m_transform->scale(lengthStretchingPercent / (float)previousLengthStretchingPercent, 1,
+                       widthStretchingPercent / (float)previousWidthStretchingPercent);
 
     for(int i=0;i<8;i++) {
         calculateNormal(&mappings[i]);
     }
-//
-//    for(int i=0;i<8;i++) {
-//        for (int j = 0; j < mappings[i].length; j++) {
-//             normalPerVertex(&mappings[i].vertices[j]);
-//        }
-//    }
 
     for(int i = 0; i < 8; i++) {
         if(mappings[i].length > 0) {
-            if(init)
+            if(init) {
                 vbo[i].create();
+            }
 
             vbo[i].bind();
             vbo[i].setUsagePattern(QOpenGLBuffer::StaticDraw);
             vbo[i].allocate(mappings[i].vertices, mappings[i].length * sizeof(Vertex));
 
-            if(init)
+            if(init) {
                 vao[i].create();
+            }
 
             vao[i].bind();
             shaderProgram->enableAttributeArray(0);
             shaderProgram->enableAttributeArray(1);
             shaderProgram->enableAttributeArray(2);
-            shaderProgram->setAttributeBuffer(0, GL_FLOAT, Vertex::positionOffset(), Vertex::PositionTupleSize,
-                                              Vertex::stride());
-            shaderProgram->setAttributeBuffer(1, GL_FLOAT, Vertex::colorOffset(), Vertex::ColorTupleSize,
-                                              Vertex::stride());
-            shaderProgram->setAttributeBuffer(2, GL_FLOAT, Vertex::normaleOffset(), Vertex::NormaleTupleSize,
-                                              Vertex::stride());
+            shaderProgram->setAttributeBuffer(0, GL_FLOAT, Vertex::positionOffset(), Vertex::PositionTupleSize, Vertex::stride());
+            shaderProgram->setAttributeBuffer(1, GL_FLOAT, Vertex::colorOffset(), Vertex::ColorTupleSize, Vertex::stride());
+            shaderProgram->setAttributeBuffer(2, GL_FLOAT, Vertex::normaleOffset(), Vertex::NormaleTupleSize, Vertex::stride());
 
             vao[i].release();
             vbo[i].release();
         }
     }
 
-    if(init)
         shaderProgram->release();
 
 }
-
-//void Gem::test(QOpenGLShaderProgram *shaderProgram){
-//
-//
-//    for(int i = 0; i < 8; i++) {
-//        if(mappings[i].length > 0) {
-//            vbo[i].bind();
-//            vbo[i].setUsagePattern(QOpenGLBuffer::StaticDraw);
-//            vbo[i].allocate(mappings[i].vertices, mappings[i].length * sizeof(Vertex));
-//
-//            vao[i].bind();
-//            shaderProgram->enableAttributeArray(0);
-//            shaderProgram->enableAttributeArray(1);
-//            shaderProgram->enableAttributeArray(2);
-//            shaderProgram->setAttributeBuffer(0, GL_FLOAT, Vertex::positionOffset(), Vertex::PositionTupleSize,
-//                                              Vertex::stride());
-//            shaderProgram->setAttributeBuffer(1, GL_FLOAT, Vertex::colorOffset(), Vertex::ColorTupleSize,
-//                                              Vertex::stride());
-//            shaderProgram->setAttributeBuffer(2, GL_FLOAT, Vertex::normaleOffset(), Vertex::NormaleTupleSize,
-//                                              Vertex::stride());
-//
-//            vao[i].release();
-//            vbo[i].release();
-//        }
-//    }
-//}
 
 void Gem::drawShape(QOpenGLShaderProgram *shaderProgram, int u_modelToWorld, Transform3D m_transform) {
 
@@ -481,19 +406,6 @@ void Gem::drawShape(QOpenGLShaderProgram *shaderProgram, int u_modelToWorld, Tra
             vao[i].release();
         }
     }
-
-//    vao[0].bind();
-//    shaderProgram->setUniformValue(u_modelToWorld, m_transform.toMatrix());
-//    glDrawArrays(GL_POINTS, 0, topComplexity * topNbPoints);
-//    vao[0].release();
-//    vao[1].bind();
-//    shaderProgram->setUniformValue(u_modelToWorld, m_transform.toMatrix());
-//    glDrawArrays(GL_POINTS, 0, (bottomComplexity - 1) * middleNbPoints + 1);
-//    vao[1].release();
-//    vao[2].bind();
-//    shaderProgram->setUniformValue(u_modelToWorld, m_transform.toMatrix());
-//    glDrawArrays(GL_POINTS, 0, middleNbPoints);
-//    vao[2].release();
 
 }
 
@@ -630,4 +542,12 @@ GLint Gem::getBottomComplexity() const {
 
 const QColor &Gem::getColor() const {
     return color;
+}
+
+GLint Gem::getLengthStretchingPercent() const {
+    return lengthStretchingPercent;
+}
+
+GLint Gem::getWidthStretchingPercent() const {
+    return widthStretchingPercent;
 }

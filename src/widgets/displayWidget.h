@@ -49,7 +49,7 @@ public:
     void resizeGL(int width, int height);
     void updateGem(GLfloat topHeight, GLfloat bottomHeight, GLfloat topRadius, GLfloat middleRadius,
                    GLfloat bottomRadius, GLint topNbPoints, GLint middleNbPoints, GLint bottomNbPoints,
-                   GLint topComplexity, GLint bottomComplexity, QColor color);
+                   GLint topComplexity, GLint bottomComplexity, GLint lengthStretchingPercent, GLint widthStretchingPercent, QColor color);
 
     Gem *getGem() const;
 

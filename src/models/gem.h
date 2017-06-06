@@ -28,6 +28,11 @@ private:
     GLfloat topRadius, middleRadius, bottomRadius, innerMiddleRadius;
     GLint topNbPoints, middleNbPoints, bottomNbPoints;
     GLint topComplexity, bottomComplexity;
+    GLint lengthStretchingPercent = 100;
+    GLint widthStretchingPercent = 100;
+
+    GLint previousLengthStretchingPercent;
+    GLint previousWidthStretchingPercent;
 
     Vertex *topVertices, *middleVertices, *bottomVertices;
     VerticesMapping *mappings;
@@ -52,16 +57,14 @@ public:
 
     Gem(GLfloat topHeight, GLfloat bottomHeight, GLfloat topRadius, GLfloat middleRadius, GLfloat bottomRadius,
         GLint topNbPoints, GLint middleNbPoints, GLint bottomNbPoints, GLint topComplexity, GLint bottomComplexity,
-        QColor color);
+        GLint lengthStretchingPercent, GLint widthStretchingPercent, QColor color);
     ~Gem();
-    void initializeBuffer(QOpenGLShaderProgram *shaderProgram,bool init);
+    void initializeBuffer(QOpenGLShaderProgram *shaderProgram, Transform3D *m_transform, bool init);
 
 
-    void initGem(GLfloat topHeight, GLfloat bottomHeight, GLfloat topRadius, GLfloat middleRadius,
-                 GLfloat bottomRadius,
-                 GLint topNbPoints, GLint middleNbPoints, GLint bottomNbPoints, GLint topComplexity,
-                 GLint bottomComplexity,
-                 QColor color);
+    void initGem(GLfloat topHeight, GLfloat bottomHeight, GLfloat topRadius, GLfloat middleRadius, GLfloat bottomRadius,
+                 GLint topNbPoints, GLint middleNbPoints, GLint bottomNbPoints, GLint topComplexity, GLint bottomComplexity,
+                 GLint lengthStretchingPercent, GLint widthStretchingPercent, QColor color);
     void drawShape(QOpenGLShaderProgram *shaderProgram, int u_modelToWorld, Transform3D m_transform);
 
     GLfloat getTopHeight() const;
@@ -83,6 +86,10 @@ public:
     GLint getTopComplexity() const;
 
     GLint getBottomComplexity() const;
+
+    GLint getLengthStretchingPercent() const;
+
+    GLint getWidthStretchingPercent() const;
 
     const QColor &getColor() const;
 
