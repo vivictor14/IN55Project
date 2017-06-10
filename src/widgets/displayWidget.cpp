@@ -5,16 +5,18 @@ DisplayWidget::DisplayWidget() {
     m_camera.rotate(-40, 1, 0, 0);
     m_transform.translate(0, -20, -20);
     lumiere.pos = {0.0f,0.0f,0.0f,1.0f};
-    lumiere.ambiant = {0.5f, 0.5f, 0.5f, 1.0f };
-    lumiere.specular = {0.0f, 0.0f, 1.0f, 1.0f };
+    lumiere.ambiant = {0.2f, 0.2f, 0.2f, 1.0f };
+    lumiere.specular = {0.5f, 0.5f, 0.5f, 1.0f };
     lumiere.diffuse = {0.5f, 0.5f, 0.5f, 1.0f };
     gem = new Gem(2, 4, 4, 6, 4, 8, 8, 8, 5, 5, 100, 100, QColor("red"));
+    skybox = new skyBox();
 }
 
 DisplayWidget::~DisplayWidget() {
     makeCurrent();
     delete shaderProgram;
     delete gem;
+    delete skybox;
 }
 
 void DisplayWidget::initializeGL() {
@@ -29,7 +31,9 @@ void DisplayWidget::initializeGL() {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+    glEnable(GL_TEXTURE_2D);
+
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
     shaderProgram = new QOpenGLShaderProgram();
     shaderProgram->addShaderFromSourceFile(QOpenGLShader::Vertex, "..\\src\\shaders\\base\\vertexShader.glsl");
@@ -45,11 +49,28 @@ void DisplayWidget::initializeGL() {
 
     gem->initializeBuffer(shaderProgram, &m_transform, true);
 
+    skyBoxShaderProgram = new QOpenGLShaderProgram();
+    skyBoxShaderProgram->addShaderFromSourceFile(QOpenGLShader::Vertex, "..\\src\\shaders\\base\\skyBoxVertexShader.glsl");
+    skyBoxShaderProgram->addShaderFromSourceFile(QOpenGLShader::Fragment, "..\\src\\shaders\\base\\skyBoxFragmentShader.glsl");
+
+    skyBoxShaderProgram->link();
+
+    skybox->initializeBuffer(skyBoxShaderProgram);
+
+
 }
 
 void DisplayWidget::paintGL() {
 
     glClear(GL_COLOR_BUFFER_BIT);
+
+
+    skyBoxShaderProgram->bind();
+    skyBoxShaderProgram->setUniformValue("cameraToView", m_projection);
+    skyBoxShaderProgram->setUniformValue("worldToCamera", m_camera.toMatrix());
+    skybox->drawShape();
+    skyBoxShaderProgram->release();
+
 
     shaderProgram->bind();
     shaderProgram->setUniformValue(u_worldToCamera, m_camera.toMatrix());
@@ -58,8 +79,10 @@ void DisplayWidget::paintGL() {
     shaderProgram->setUniformValue("lumiere.ambiant", lumiere.ambiant);
     shaderProgram->setUniformValue("lumiere.specular", lumiere.specular);
     shaderProgram->setUniformValue("lumiere.diffuse", lumiere.diffuse);
-    gem->drawShape(shaderProgram, u_modelToWorld, m_transform);
+    shaderProgram->setUniformValue("cameraPos", m_camera.translation());
+    gem->drawShape(shaderProgram, u_modelToWorld, m_transform,skybox->getTexture());
     shaderProgram->release();
+
 
 }
 

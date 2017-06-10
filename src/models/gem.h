@@ -1,6 +1,7 @@
 #ifndef IN55PROJECT_GEM_H
 #define IN55PROJECT_GEM_H
 
+
 #include <GL/gl.h>
 #include <QtGui/QOpenGLFunctions>
 #include <QtGui/QVector3D>
@@ -65,7 +66,7 @@ public:
     void initGem(GLfloat topHeight, GLfloat bottomHeight, GLfloat topRadius, GLfloat middleRadius, GLfloat bottomRadius,
                  GLint topNbPoints, GLint middleNbPoints, GLint bottomNbPoints, GLint topComplexity, GLint bottomComplexity,
                  GLint lengthStretchingPercent, GLint widthStretchingPercent, QColor color);
-    void drawShape(QOpenGLShaderProgram *shaderProgram, int u_modelToWorld, Transform3D m_transform);
+    void drawShape(QOpenGLShaderProgram *shaderProgram, int u_modelToWorld, Transform3D m_transform,unsigned int cubemapTexture);
 
     GLfloat getTopHeight() const;
 
@@ -92,7 +93,6 @@ public:
     GLint getWidthStretchingPercent() const;
 
     const QColor &getColor() const;
-
 };
 
 

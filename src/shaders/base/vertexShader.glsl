@@ -12,13 +12,11 @@ layout(location = 0) in vec3 position;
 layout(location = 1) in vec3 color;
 layout(location = 2) in vec3 normal;
 
-out vec3 Normal_cameraspace;
-out vec3 LightDirection_cameraspace;
-out vec4 vColor;
+out vec3 TexCoords;
 
-uniform mat4 modelToWorld; // P
-uniform mat4 worldToCamera; // V
-uniform mat4 cameraToView; // M
+uniform mat4 modelToWorld;
+uniform mat4 worldToCamera;
+uniform mat4 cameraToView;
 uniform ligth lumiere; // M
 
 //
@@ -48,6 +46,16 @@ uniform ligth lumiere; // M
 //
 //}
 
+out vec4 amb;
+out vec4 diff;
+out vec4 spec;
+out vec3 ColorT;
+
+out vec3 Position;
+out vec3 n;
+
+
+
 void DirectionalLight(in vec3 V, in vec3 normal,inout vec4 ambient,inout vec4 diffuse, inout vec4 specular);
 void PointLight(in vec3 V, in vec3 sp, in vec3 normal, inout vec4 ambient, inout vec4 diffuse, inout vec4 specular );
 
@@ -58,14 +66,18 @@ void main()
     vec3 sp = vec3( worldToCamera * modelToWorld * vec4(position,1) );
     vec3 V = -normalize( sp );
     vec3 unit_normal = normalize( glNormalMatrix*normal.xyz );
-    vec4 amb = vec4(0.0);  vec4 diff = vec4(0.0);  vec4 spec = vec4(0.0);
+    amb = vec4(0.0);  diff = vec4(0.0);  spec = vec4(0.0);
 
 //    DirectionalLight(V, unit_normal, amb, diff, spec);
     PointLight(V, sp, unit_normal, amb, diff, spec);
 
-    vColor = vec4(color,1) * amb + vec4(color,1) * diff + vec4(color,1)  * spec;
+    TexCoords = position;
 
     gl_Position =  cameraToView * worldToCamera * modelToWorld * vec4(position,1);
+
+    ColorT = color;
+    n = unit_normal;
+    Position = vec3(modelToWorld * vec4(position,1));
 }
 
 
@@ -113,34 +125,9 @@ void PointLight(in vec3 V, in vec3 sp, in vec3 normal, inout vec4 ambient, inout
     if (nDotLi == 0.0)
         pf = 0.0;
     else
-        pf = pow(nDotH, 0.6);
+        pf = pow(nDotH, 42);
 
     ambient += lumiere.ambiant;
     diffuse += lumiere.diffuse * nDotLi;
     specular += lumiere.specular * pf;
 }
-
-//
-//uniform mat4 modelToWorld; // M
-//uniform mat4 worldToCamera; // V
-//uniform mat4 cameraToView; // P
-//
-//layout(location = 0) in vec3 position;
-//layout(location = 1) in vec3 color;
-//layout(location = 2) in vec3 normal;
-//
-//out vec3 fragVert;
-//out vec3 fragNormal;
-//out mat4 model;
-//out vec3 vColor;
-//
-//void main() {
-//    // Pass some variables to the fragment shader
-//    fragNormal = normalize(normal);
-//    fragVert = normalize(position);
-//
-//    vColor = color;
-//    model = modelToWorld;
-//    // Apply all matrix transformations to vert
-//    gl_Position = cameraToView * worldToCamera * modelToWorld * vec4(position, 1);
-//}

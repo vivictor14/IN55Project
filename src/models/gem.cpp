@@ -162,7 +162,7 @@ void Gem::mapping() {
 }
 
 void Gem::tableMapping(VerticesMapping *mapping, Vertex *vertices, GLint nbPoints, GLint complexity) {
-    
+
     mapping->mode = GL_TRIANGLES;
     mapping->length = nbPoints * 3 ;
     mapping->vertices = new Vertex[mapping->length];
@@ -351,9 +351,8 @@ void Gem::initializeBuffer(QOpenGLShaderProgram *shaderProgram, Transform3D *m_t
 
     initializeOpenGLFunctions();
 
-    shaderProgram->bind();
-
     if(init) {
+        shaderProgram->bind();
         vbo = new QOpenGLBuffer[8];
         vao = new QOpenGLVertexArrayObject[8];
     }
@@ -391,17 +390,19 @@ void Gem::initializeBuffer(QOpenGLShaderProgram *shaderProgram, Transform3D *m_t
             vbo[i].release();
         }
     }
-
+    if(init)
         shaderProgram->release();
 
 }
 
-void Gem::drawShape(QOpenGLShaderProgram *shaderProgram, int u_modelToWorld, Transform3D m_transform) {
+void Gem::drawShape(QOpenGLShaderProgram *shaderProgram, int u_modelToWorld, Transform3D m_transform,unsigned int cubemapTexture) {
 
     for(int i = 0; i < 8; i++) {
         if(mappings[i].length > 0) {
             vao[i].bind();
             shaderProgram->setUniformValue(u_modelToWorld, m_transform.toMatrix());
+            glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+            glDepthMask(GL_TRUE);
             glDrawArrays(mappings[i].mode, 0, mappings[i].length);
             vao[i].release();
         }
@@ -543,6 +544,7 @@ GLint Gem::getBottomComplexity() const {
 const QColor &Gem::getColor() const {
     return color;
 }
+
 
 GLint Gem::getLengthStretchingPercent() const {
     return lengthStretchingPercent;
