@@ -79,12 +79,12 @@ void skyBox::initializeBuffer(QOpenGLShaderProgram *shaderProgram) {
 
     std::vector<std::string> faces =
             {
-                    "C:\\Users\\Anthony\\Desktop\\texture\\Garde\\left.jpg",
-                    "C:\\Users\\Anthony\\Desktop\\texture\\Garde\\right.jpg",
-                    "C:\\Users\\Anthony\\Desktop\\texture\\Garde\\top.jpg",
-                    "C:\\Users\\Anthony\\Desktop\\texture\\Garde\\bottom.jpg",
-                    "C:\\Users\\Anthony\\Desktop\\texture\\Garde\\back.jpg",
-                    "C:\\Users\\Anthony\\Desktop\\texture\\Garde\\front.jpg"
+                    "..\\ressource\\Texture\\leftSkybox.jpg",
+                    "..\\ressource\\Texture\\rightSkybox.jpg",
+                    "..\\ressource\\Texture\\topSkybox.jpg",
+                    "..\\ressource\\Texture\\bottomSkybox.jpg",
+                    "..\\ressource\\Texture\\backSkybox.jpg",
+                    "..\\ressource\\Texture\\frontSkybox.jpg"
             };
 
     cubemapTexture = loadCubemap(faces);
