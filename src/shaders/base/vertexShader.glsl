@@ -35,7 +35,7 @@ void main()
 {
 
     mat3 glNormalMatrix = transpose(inverse(mat3(modelToWorld)));
-    vec3 sp = vec3( modelToWorld * vec4(position,1) );
+    vec3 sp = vec3(modelToWorld * vec4(position,1));
     vec3 V = -normalize( sp );
     vec3 unit_normal = normalize( glNormalMatrix*normal.xyz );
     amb = vec4(0.0);  diff = vec4(0.0);  spec = vec4(0.0);
@@ -89,12 +89,12 @@ void PointLight(in vec3 V, in vec3 sp, in vec3 normal, inout vec4 ambient, inout
     nDotLi = max(0.0, dot(normal, L));
     nDotH = max(0.0, dot(normal, halfway_vector));
 
-    attenuation = 1.0 / (0.4 + 0.01 *d*d);
+    attenuation = 1.0 / (0.1*d);
 
     if (nDotLi == 0.0)
         pf = 0.0;
     else
-        pf = pow(nDotH, 0.6);
+        pf = pow(nDotH, 0.88);
 
 // valeur trouver pour un materiau de type émeraude
     ambient += lumiere.ambiant ;
