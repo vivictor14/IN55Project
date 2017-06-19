@@ -38,9 +38,9 @@ void main()
     vec3 sp = vec3(modelToWorld * vec4(position,1));
     vec3 V = -normalize( sp );
     vec3 unit_normal = normalize( glNormalMatrix*normal.xyz );
-    amb = vec4(0.0);  diff = vec4(0.0);  spec = vec4(0.0);
+    amb = vec4(0.2,0.2,0.2,1.0);  diff = vec4(0.0);  spec = vec4(0.0);
 
-  //  DirectionalLight(V, unit_normal, amb, diff, spec);
+    //DirectionalLight(V, unit_normal, amb, diff, spec);
     PointLight(V, sp, unit_normal, amb, diff, spec);
 
     gl_Position =  cameraToView * worldToCamera * modelToWorld * vec4(position,1);
@@ -58,14 +58,14 @@ void DirectionalLight(in vec3 V, in vec3 normal,inout vec4 ambient,inout vec4 di
     float nDotH;   // normal . light half vector
     float pf;// power factor
 
-    vec3 halfway_vector = normalize(V+lumiere.pos.xyz);
+    vec3 halfway_vector = normalize(lumiere.pos.xyz + V);
     nDotLi = max(0.0, dot(normal, normalize(lumiere.pos.xyz)));
     if (nDotLi == 0.0)
         pf = 0.0;
     else
     {
         nDotH = max(0.0, dot(normal, halfway_vector));
-        pf = pow(nDotH, 4*0.6);
+        pf = pow(nDotH, 4*0.88);
     }
     ambient += lumiere.ambiant;
     diffuse += lumiere.diffuse * nDotLi;
@@ -89,14 +89,13 @@ void PointLight(in vec3 V, in vec3 sp, in vec3 normal, inout vec4 ambient, inout
     nDotLi = max(0.0, dot(normal, L));
     nDotH = max(0.0, dot(normal, halfway_vector));
 
-    attenuation = 1.0 / (0.1*d);
+    attenuation = 1.0 / (0.06*d);
 
     if (nDotLi == 0.0)
         pf = 0.0;
     else
         pf = pow(nDotH, 0.88);
 
-// valeur trouver pour un materiau de type émeraude
     ambient += lumiere.ambiant ;
     diffuse += lumiere.diffuse * nDotLi ;
     specular += lumiere.specular * pf;
