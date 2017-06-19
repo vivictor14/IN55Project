@@ -134,19 +134,19 @@ void MenuWidget::initMenu() {
     autoRotateCheckBox->setChecked(displayWidget->isAutoRotate());
     QWidget::connect(autoRotateCheckBox, SIGNAL(stateChanged(int)), displayWidget, SLOT(triggerAutoRotation(int)));
 
-    initTemplateButton(dropTemplateButton, "Drop", "");
+    initTemplateButton(dropTemplateButton, "Drop");
     QWidget::connect(dropTemplateButton, SIGNAL(clicked()), this, SLOT(applyDropTemplate()));
-    initTemplateButton(triangleTemplateButton, "Triangle", "");
+    initTemplateButton(triangleTemplateButton, "Triangle");
     QWidget::connect(triangleTemplateButton, SIGNAL(clicked()), this, SLOT(applyTriangleTemplate()));
-    initTemplateButton(brilliantTemplateButton, "Brilliant", "");
+    initTemplateButton(brilliantTemplateButton, "Brilliant");
     QWidget::connect(brilliantTemplateButton, SIGNAL(clicked()), this, SLOT(applyBrilliantTemplate()));
-    initTemplateButton(marquiseTemplateButton, "Marquise", "");
+    initTemplateButton(marquiseTemplateButton, "Marquise");
     QWidget::connect(marquiseTemplateButton, SIGNAL(clicked()), this, SLOT(applyMarquiseTemplate()));
-    initTemplateButton(princessTemplateButton, "Princess", "");
+    initTemplateButton(princessTemplateButton, "Princess");
     QWidget::connect(princessTemplateButton, SIGNAL(clicked()), this, SLOT(applyPrincessTemplate()));
-    initTemplateButton(ovalTemplateButton, "Oval", "");
+    initTemplateButton(ovalTemplateButton, "Oval");
     QWidget::connect(ovalTemplateButton, SIGNAL(clicked()), this, SLOT(applyOvalTemplate()));
-    initTemplateButton(hexagonTemplateButton, "Hexagon", "");
+    initTemplateButton(hexagonTemplateButton, "Hexagon");
     QWidget::connect(hexagonTemplateButton, SIGNAL(clicked()), this, SLOT(applyHexagonTemplate()));
 
     setParametersLabelText();
@@ -159,10 +159,10 @@ void MenuWidget::initSlider(QSlider *slider, int minimum, int maximum) {
     QWidget::connect(slider, SIGNAL(valueChanged(int)), this, SLOT(updateGem(int)));
 }
 
-void MenuWidget::initTemplateButton(QPushButton *templateButton, QString name, QString imagePath) {
+void MenuWidget::initTemplateButton(QPushButton *templateButton, QString name) {
     templateButton->setFixedSize(40, 40);
     templateButton->setToolTip(name);
-    templateButton->setIcon(QIcon(imagePath));
+    templateButton->setIcon(QIcon("../resources/Icons/" + name + ".png"));
     templateButton->setIconSize(QSize(40, 40));
 }
 
@@ -264,7 +264,7 @@ void MenuWidget::applyOvalTemplate() {
 }
 
 void MenuWidget::applyHexagonTemplate() {
-    displayWidget->updateGem(2, 6, 4, 7, 5, 6, 6, 1, 2, 4, 100, 100, QColor("Grey"));
+    displayWidget->updateGem(2, 6, 4, 7, 5, 6, 6, 1, 2, 4, 100, 100, QColor("Black"));
     updateControls();
     updateToolTips();
     setParametersLabelText();

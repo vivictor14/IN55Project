@@ -1,11 +1,11 @@
 //
 // Created by Anthony on 09/06/2017.
 //
-#include "skyBox.h"
+#include "SkyBox.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
-skyBox::skyBox() {
+SkyBox::SkyBox() {
 
     mapping = new VerticesMapping[1];
 
@@ -66,25 +66,25 @@ skyBox::skyBox() {
 
 }
 
-skyBox::~skyBox() {
+SkyBox::~SkyBox() {
 
     vbo[0].destroy();
     vao[0].destroy();
 
 }
 
-void skyBox::initializeBuffer(QOpenGLShaderProgram *shaderProgram) {
+void SkyBox::initializeBuffer(QOpenGLShaderProgram *shaderProgram) {
 
     initializeOpenGLFunctions();
 
     std::vector<std::string> faces =
             {
-                    "..\\ressource\\Texture\\leftSkybox.jpg",
-                    "..\\ressource\\Texture\\rightSkybox.jpg",
-                    "..\\ressource\\Texture\\topSkybox.jpg",
-                    "..\\ressource\\Texture\\bottomSkybox.jpg",
-                    "..\\ressource\\Texture\\backSkybox.jpg",
-                    "..\\ressource\\Texture\\frontSkybox.jpg"
+                    "..\\resources\\Texture\\leftSkybox.jpg",
+                    "..\\resources\\Texture\\rightSkybox.jpg",
+                    "..\\resources\\Texture\\topSkybox.jpg",
+                    "..\\resources\\Texture\\bottomSkybox.jpg",
+                    "..\\resources\\Texture\\backSkybox.jpg",
+                    "..\\resources\\Texture\\frontSkybox.jpg"
             };
 
     cubemapTexture = loadCubemap(faces);
@@ -116,7 +116,7 @@ void skyBox::initializeBuffer(QOpenGLShaderProgram *shaderProgram) {
 
 }
 
-void skyBox::drawShape() {
+void SkyBox::drawShape() {
 
     vao[0].bind();
     glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
@@ -126,12 +126,12 @@ void skyBox::drawShape() {
 
 }
 
-unsigned int skyBox::getTexture(){
+unsigned int SkyBox::getTexture(){
     return cubemapTexture;
 }
 
 
-unsigned int skyBox::loadCubemap(std::vector<std::string> faces) {
+unsigned int SkyBox::loadCubemap(std::vector<std::string> faces) {
     unsigned int textureID;
     glGenTextures(1, &textureID);
     glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);

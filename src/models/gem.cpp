@@ -384,7 +384,7 @@ void Gem::initializeBuffer(QOpenGLShaderProgram *shaderProgram, Transform3D *m_t
             shaderProgram->enableAttributeArray(2);
             shaderProgram->setAttributeBuffer(0, GL_FLOAT, Vertex::positionOffset(), Vertex::PositionTupleSize, Vertex::stride());
             shaderProgram->setAttributeBuffer(1, GL_FLOAT, Vertex::colorOffset(), Vertex::ColorTupleSize, Vertex::stride());
-            shaderProgram->setAttributeBuffer(2, GL_FLOAT, Vertex::normaleOffset(), Vertex::NormaleTupleSize, Vertex::stride());
+            shaderProgram->setAttributeBuffer(2, GL_FLOAT, Vertex::normalOffset(), Vertex::NormalTupleSize, Vertex::stride());
 
             vao[i].release();
             vbo[i].release();
@@ -412,32 +412,15 @@ void Gem::drawShape(QOpenGLShaderProgram *shaderProgram, int u_modelToWorld, Tra
 
 void Gem::calculateNormal(VerticesMapping *Mapping) {
 
-    Mapping->normals = new QVector3D[Mapping->length];
+//    Mapping->normals = new QVector3D[Mapping->length];
     Vertex point1, point2,point3;
     float x,y,z;
     QVector3D *u,*v,*n;
 
     switch(Mapping->mode){
-        case GL_TRIANGLES:{
-            for(int i=0;i<Mapping->length;i=i+3){
-                point1 = Mapping->vertices[i];
-                point2 = Mapping->vertices[i+1];
-                point3 = Mapping->vertices[i+2];
-                u = new QVector3D(point2.position()-point1.position());
-                v = new QVector3D(point3.position()-point1.position());
-                x = (u->y()*v->z() - (u->z()*v->y()));
-                y = (u->z()*v->x() -(u->x()*v->z()));
-                z = (u->x()*v->y() - (u->y()*v->x()));
-                n = new QVector3D(x,y,z);
-                Mapping->vertices[i].setNormale(*n);
-                Mapping->vertices[i+1].setNormale(*n);
-                Mapping->vertices[i+2].setNormale(*n);
-            }
-            break;
-        }
-        case GL_TRIANGLE_FAN: {
+        case GL_TRIANGLE_FAN:
             point1 = Mapping->vertices[0];
-            Mapping->normals[0] = *(new QVector3D(0.f,0.f,0.f));
+//            Mapping->normals[0] = *(new QVector3D(0.f,0.f,0.f));
             for(int i=1;i<Mapping->length-1;i++){
 
                 point2 = Mapping->vertices[i];
@@ -448,9 +431,9 @@ void Gem::calculateNormal(VerticesMapping *Mapping) {
                 y = (u->z()*v->x() -(u->x()*v->z()));
                 z = (u->x()*v->y() - (u->y()*v->x()));
                 n = new QVector3D(x,y,z);
-                Mapping->vertices[0].setNormale(*n);
-                Mapping->vertices[i].setNormale(*n);
-                Mapping->vertices[i+1].setNormale(*n);
+                Mapping->vertices[0].setNormal(*n);
+                Mapping->vertices[i].setNormal(*n);
+                Mapping->vertices[i + 1].setNormal(*n);
             }
             point2 = Mapping->vertices[Mapping->length-1];
             point3 = Mapping->vertices[1];
@@ -460,44 +443,29 @@ void Gem::calculateNormal(VerticesMapping *Mapping) {
             y = (u->z()*v->x() -(u->x()*v->z()));
             z = (u->x()*v->y() - (u->y()*v->x()));
             n = new QVector3D(x,y,z);
-            Mapping->vertices[0].setNormale(*n);
-            Mapping->vertices[Mapping->length-1].setNormale(*n);
-            Mapping->vertices[1].setNormale(*n);
+            Mapping->vertices[0].setNormal(*n);
+            Mapping->vertices[Mapping->length - 1].setNormal(*n);
+            Mapping->vertices[1].setNormal(*n);
             break;
-        }
-    }
 
-}
-
-//Smoth version
-void Gem::normalPerVertex(Vertex *pVertex) {
-
-    QVector3D normal;
-    std::vector<int> data;
-    data.clear();
-    const int *p;
-    for(int i=0;i<8;i++) {
-
-            for (int j = 0; j < mappings[i].length; j++) {
-
-                if (mappings[i].vertices[j].position() == pVertex->position()) {
-                    normal.setX(normal.x() + mappings[i].normals[j].x());
-                    normal.setY(normal.y() + mappings[i].normals[j].y());
-                    normal.setZ(normal.z() + mappings[i].normals[j].z());
-                    data.push_back(i);
-                    data.push_back(j);
-                }
+        case GL_TRIANGLES:
+        default:
+            for(int i=0;i<Mapping->length;i=i+3){
+                point1 = Mapping->vertices[i];
+                point2 = Mapping->vertices[i+1];
+                point3 = Mapping->vertices[i+2];
+                u = new QVector3D(point2.position()-point1.position());
+                v = new QVector3D(point3.position()-point1.position());
+                x = (u->y()*v->z() - (u->z()*v->y()));
+                y = (u->z()*v->x() -(u->x()*v->z()));
+                z = (u->x()*v->y() - (u->y()*v->x()));
+                n = new QVector3D(x,y,z);
+                Mapping->vertices[i].setNormal(*n);
+                Mapping->vertices[i + 1].setNormal(*n);
+                Mapping->vertices[i + 2].setNormal(*n);
             }
-        }
 
-    normal.setX(normal.x()/data.size());
-    normal.setY(normal.y()/data.size());
-    normal.setZ(normal.z()/data.size());
-
-    for(p=&data[0];p!=&data[0]+data.size();++p){
-        mappings[*p].vertices[*(++p)].setNormale(normal);
     }
-
 
 }
 

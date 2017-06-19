@@ -2,21 +2,21 @@
 
 DisplayWidget::DisplayWidget() {
     setFocusPolicy( Qt::StrongFocus );
-    m_camera.rotate(-40, 1, 0, 0);
-    m_transform.translate(0, -20, -20);
-    lumiere.pos = {0.0f,0.0f,0.0f,1.0f};
-    lumiere.ambiant = {0.2f, 0.2f, 0.2f, 1.0f };
-    lumiere.specular = {0.5f, 0.5f, 0.5f, 1.0f };
-    lumiere.diffuse = {0.5f, 0.5f, 0.5f, 1.0f };
+    m_camera.rotate(-10, 1, 0, 0);
+    m_transform.translate(0, -5, -35);
+    lumiere.pos = { 0.0f, 0.0f, 0.0f, 1.0f };
+    lumiere.ambient = { 0.3f, 0.3f, 0.3f, 1.0f };
+    lumiere.specular = { 0.5f, 0.5f, 0.5f, 1.0f };
+    lumiere.diffuse = { 0.5f, 0.5f, 0.5f, 1.0f };
     gem = new Gem(2, 4, 4, 6, 4, 8, 8, 8, 5, 5, 100, 100, QColor("red"));
-    skybox = new skyBox();
+    skyBox = new SkyBox();
 }
 
 DisplayWidget::~DisplayWidget() {
     makeCurrent();
     delete shaderProgram;
     delete gem;
-    delete skybox;
+    delete skyBox;
 }
 
 void DisplayWidget::initializeGL() {
@@ -55,7 +55,7 @@ void DisplayWidget::initializeGL() {
 
     skyBoxShaderProgram->link();
 
-    skybox->initializeBuffer(skyBoxShaderProgram);
+    skyBox->initializeBuffer(skyBoxShaderProgram);
 
 
 }
@@ -68,7 +68,7 @@ void DisplayWidget::paintGL() {
     skyBoxShaderProgram->bind();
     skyBoxShaderProgram->setUniformValue("cameraToView", m_projection);
     skyBoxShaderProgram->setUniformValue("worldToCamera", m_camera.toMatrix());
-    skybox->drawShape();
+    skyBox->drawShape();
     skyBoxShaderProgram->release();
 
 
@@ -76,11 +76,11 @@ void DisplayWidget::paintGL() {
     shaderProgram->setUniformValue(u_worldToCamera, m_camera.toMatrix());
     shaderProgram->setUniformValue(u_cameraToView, m_projection);
     shaderProgram->setUniformValue("lumiere.pos", lumiere.pos);
-    shaderProgram->setUniformValue("lumiere.ambiant", lumiere.ambiant);
+    shaderProgram->setUniformValue("lumiere.ambient", lumiere.ambient);
     shaderProgram->setUniformValue("lumiere.specular", lumiere.specular);
     shaderProgram->setUniformValue("lumiere.diffuse", lumiere.diffuse);
     shaderProgram->setUniformValue("cameraPos", m_camera.translation());
-    gem->drawShape(shaderProgram, u_modelToWorld, m_transform,skybox->getTexture());
+    gem->drawShape(shaderProgram, u_modelToWorld, m_transform,skyBox->getTexture());
     shaderProgram->release();
 
 

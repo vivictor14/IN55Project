@@ -65,7 +65,7 @@ private:
 
     QLayout *createLayout();
     void initSlider(QSlider *slider, int minimum, int maximum);
-    void initTemplateButton(QPushButton *templateButton, QString name, QString imagePath);
+    void initTemplateButton(QPushButton *templateButton, QString name);
     void initMenu();
     void updateToolTips();
     void updateControls();

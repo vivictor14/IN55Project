@@ -16,7 +16,6 @@
 struct VerticesMapping {
     Vertex *vertices;
     int length = 0;
-    QVector3D *normals;
     GLenum mode;
 };
 
@@ -52,8 +51,6 @@ private:
     void upperGirdleMapping(VerticesMapping *mapping, Vertex *vertices, GLint nbPoints, GLint complexity, bool clockWise);
     void calculateNormal(VerticesMapping *pMapping);
 
-    void normalPerVertex(Vertex *pVertex);
-
 public:
 
     Gem(GLfloat topHeight, GLfloat bottomHeight, GLfloat topRadius, GLfloat middleRadius, GLfloat bottomRadius,
@@ -68,30 +65,19 @@ public:
                  GLint lengthStretchingPercent, GLint widthStretchingPercent, QColor color);
     void drawShape(QOpenGLShaderProgram *shaderProgram, int u_modelToWorld, Transform3D m_transform,unsigned int cubemapTexture);
 
+    // Accessors
     GLfloat getTopHeight() const;
-
     GLfloat getBottomHeight() const;
-
     GLfloat getTopRadius() const;
-
     GLfloat getMiddleRadius() const;
-
     GLfloat getBottomRadius() const;
-
     GLint getTopNbPoints() const;
-
     GLint getMiddleNbPoints() const;
-
     GLint getBottomNbPoints() const;
-
     GLint getTopComplexity() const;
-
     GLint getBottomComplexity() const;
-
     GLint getLengthStretchingPercent() const;
-
     GLint getWidthStretchingPercent() const;
-
     const QColor &getColor() const;
 };
 

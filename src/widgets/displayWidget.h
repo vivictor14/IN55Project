@@ -7,7 +7,7 @@
 #include <QOpenGLVertexArrayObject>
 #include "vertex.h"
 #include "gem.h"
-#include "skyBox.h"
+#include "SkyBox.h"
 #include <QMatrix4x4>
 #include <QtWidgets/QOpenGLWidget>
 #include "transform3d.h"
@@ -23,10 +23,10 @@ class DisplayWidget : public QOpenGLWidget, protected QOpenGLFunctions {
 private:
 
     Gem *gem;
-    skyBox *skybox;
+    SkyBox *skyBox;
     QOpenGLShaderProgram *shaderProgram;
     QOpenGLShaderProgram *skyBoxShaderProgram;
-    bool autoRotate = false;
+    bool autoRotate = true;
     int u_modelToWorld;
     int u_worldToCamera;
     int u_cameraToView;
@@ -36,7 +36,7 @@ private:
     struct
     {
         QVector4D pos;
-        QVector4D ambiant;
+        QVector4D ambient;
         QVector4D diffuse;
         QVector4D specular;
     }lumiere;

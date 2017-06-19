@@ -17,7 +17,7 @@
 #include <QtGui/QColor>
 #include "gem.h"
 
-class skyBox : protected QOpenGLFunctions {
+class SkyBox : protected QOpenGLFunctions {
 private:
     QOpenGLBuffer *vbo;
     QOpenGLVertexArrayObject *vao;
@@ -27,9 +27,9 @@ private:
     unsigned int loadCubemap(std::vector<std::string> faces);
 
 public:
-    skyBox();
+    SkyBox();
 
-    ~skyBox();
+    ~SkyBox();
 
     void initializeBuffer(QOpenGLShaderProgram *shaderProgram);
 

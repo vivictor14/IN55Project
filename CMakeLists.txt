@@ -30,6 +30,9 @@ set(SOURCE_FILES src/main.cpp
         ${APP_MODELS}/gem.cpp
         ${APP_MODELS}/skyBox.h
         ${APP_MODELS}/skyBox.cpp
+        ${APP_MODELS}/stb_image.h
+        ${APP_MODELS}/skyBox.cpp
+        ${APP_MODELS}/skyBox.h
         ${APP_WIDGETS}/displayWidget.h
         ${APP_WIDGETS}/displayWidget.cpp
         ${APP_WIDGETS}/menuWidget.h
@@ -37,10 +40,10 @@ set(SOURCE_FILES src/main.cpp
         ${APP_UTIL}/vertex.h
         ${APP_UTIL}/transform3D.h
         ${APP_UTIL}/transform3D.cpp
+        ${APP_CONTROLS}/input.cpp
         ${APP_CONTROLS}/camera3D.h
         ${APP_CONTROLS}/camera3D.cpp
-        ${APP_CONTROLS}/input.h
-        ${APP_CONTROLS}/input.cpp src/models/stb_image.h src/models/skyBox.cpp src/models/skyBox.h)
+        ${APP_CONTROLS}/input.h)
 
 add_executable(IN55Project ${SOURCE_FILES})
 

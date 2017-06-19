@@ -12,12 +12,10 @@ int main(int argv, char **args) {
     format.setProfile(QSurfaceFormat::CoreProfile);
     format.setVersion(3, 3);
 
-
     DisplayWidget *displayWidget = new DisplayWidget();
     displayWidget->setFormat(format);
 
     MenuWidget *menuWidget = new MenuWidget(displayWidget);
-
 
     QMainWindow window;
     window.setCentralWidget(displayWidget);
