@@ -27,19 +27,19 @@ private:
     QOpenGLShaderProgram *shaderProgram;
     QOpenGLShaderProgram *skyBoxShaderProgram;
     bool autoRotate = true;
-    int u_modelToWorld;
-    int u_worldToCamera;
-    int u_cameraToView;
-    QMatrix4x4 m_projection;
-    Camera3D m_camera;
-    Transform3D m_transform;
+    int modelToWorldLocation;
+    int worldToCameraLocation;
+    int cameraToViewLocation;
+    QMatrix4x4 projectionMatrix;
+    Camera3D cameraMatrix;
+    Transform3D transformMatrix;
     struct
     {
-        QVector4D pos;
+        QVector4D position;
         QVector4D ambient;
         QVector4D diffuse;
         QVector4D specular;
-    }lumiere;
+    } light;
 
 public:
 

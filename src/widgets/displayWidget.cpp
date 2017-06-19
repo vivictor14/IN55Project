@@ -11,12 +11,12 @@ DisplayWidget::DisplayWidget() {
 
     // Default behavior and positions
     autoRotate = true;
-    m_camera.rotate(-10, 1, 0, 0);
-    m_transform.translate(0, -5, -35);
-    lumiere.pos = { 0.0f, 0.0f, 0.0f, 1.0f };
-    lumiere.ambient = { 0.3f, 0.3f, 0.3f, 1.0f };
-    lumiere.specular = { 0.5f, 0.5f, 0.5f, 1.0f };
-    lumiere.diffuse = { 0.5f, 0.5f, 0.5f, 1.0f };
+    cameraMatrix.rotate(-10, 1, 0, 0);
+    transformMatrix.translate(0, -5, -35);
+    light.position = { 0.0f, 0.0f, 0.0f, 1.0f };
+    light.ambient = { 0.3f, 0.3f, 0.3f, 1.0f };
+    light.specular = { 0.5f, 0.5f, 0.5f, 1.0f };
+    light.diffuse = { 0.5f, 0.5f, 0.5f, 1.0f };
 
     // Instantiate the gem
     gem = new Gem(2, 4, 4, 6, 4, 8, 8, 8, 5, 5, 100, 100, QColor("red"));
@@ -55,13 +55,13 @@ void DisplayWidget::initializeGL() {
 
     // Set the uniform locations
     shaderProgram->bind();
-    u_modelToWorld = shaderProgram->uniformLocation("modelToWorld");
-    u_worldToCamera = shaderProgram->uniformLocation("worldToCamera");
-    u_cameraToView = shaderProgram->uniformLocation("cameraToView");
+    modelToWorldLocation = shaderProgram->uniformLocation("modelToWorld");
+    worldToCameraLocation = shaderProgram->uniformLocation("worldToCamera");
+    cameraToViewLocation = shaderProgram->uniformLocation("cameraToView");
     shaderProgram->release();
 
     // Initialize the gem's openGL elements
-    gem->initializeBuffer(shaderProgram, &m_transform, true);
+    gem->initializeBuffer(shaderProgram, &transformMatrix, true);
 
     // Create the sky box shader program
     skyBoxShaderProgram = new QOpenGLShaderProgram();
@@ -86,21 +86,21 @@ void DisplayWidget::paintGL() {
 
     // Draw the sky box
     skyBoxShaderProgram->bind();
-    skyBoxShaderProgram->setUniformValue("cameraToView", m_projection);
-    skyBoxShaderProgram->setUniformValue("worldToCamera", m_camera.toMatrix());
+    skyBoxShaderProgram->setUniformValue("cameraToView", projectionMatrix);
+    skyBoxShaderProgram->setUniformValue("worldToCamera", cameraMatrix.toMatrix());
     skyBox->drawShape();
     skyBoxShaderProgram->release();
 
     // Draw the gem
     shaderProgram->bind();
-    shaderProgram->setUniformValue(u_worldToCamera, m_camera.toMatrix());
-    shaderProgram->setUniformValue(u_cameraToView, m_projection);
-    shaderProgram->setUniformValue("lumiere.pos", lumiere.pos);
-    shaderProgram->setUniformValue("lumiere.ambient", lumiere.ambient);
-    shaderProgram->setUniformValue("lumiere.specular", lumiere.specular);
-    shaderProgram->setUniformValue("lumiere.diffuse", lumiere.diffuse);
-    shaderProgram->setUniformValue("cameraPos", m_camera.translation());
-    gem->drawShape(shaderProgram, u_modelToWorld, m_transform,skyBox->getTexture());
+    shaderProgram->setUniformValue(worldToCameraLocation, cameraMatrix.toMatrix());
+    shaderProgram->setUniformValue(cameraToViewLocation, projectionMatrix);
+    shaderProgram->setUniformValue("light.position", light.position);
+    shaderProgram->setUniformValue("light.ambient", light.ambient);
+    shaderProgram->setUniformValue("light.specular", light.specular);
+    shaderProgram->setUniformValue("light.diffuse", light.diffuse);
+    shaderProgram->setUniformValue("cameraPos", cameraMatrix.translation());
+    gem->drawShape(shaderProgram, modelToWorldLocation, transformMatrix,skyBox->getTexture());
     shaderProgram->release();
 
 }
@@ -113,8 +113,8 @@ void DisplayWidget::paintGL() {
  */
 void DisplayWidget::resizeGL(int width, int height)
 {
-    m_projection.setToIdentity();
-    m_projection.perspective(45.0f, width / float(height), 0.0f, 1000.0f);
+    projectionMatrix.setToIdentity();
+    projectionMatrix.perspective(45.0f, width / float(height), 0.0f, 1000.0f);
 }
 
 /**
@@ -132,8 +132,8 @@ void DisplayWidget::update() {
         static const float rotSpeed = 0.5f;
 
         // Handle rotations
-        m_camera.rotate(-rotSpeed * Input::mouseDelta().x(), Camera3D::LocalUp);
-        m_camera.rotate(-rotSpeed * Input::mouseDelta().y(), m_camera.right());
+        cameraMatrix.rotate(-rotSpeed * Input::mouseDelta().x(), Camera3D::LocalUp);
+        cameraMatrix.rotate(-rotSpeed * Input::mouseDelta().y(), cameraMatrix.right());
     }
 
     static const float transSpeed = 0.5f;
@@ -142,39 +142,39 @@ void DisplayWidget::update() {
     QVector3D translation;
     if (Input::keyPressed(Qt::Key_Z))
     {
-        translation += m_camera.forward();
+        translation += cameraMatrix.forward();
     }
     if (Input::keyPressed(Qt::Key_S))
     {
-        translation -= m_camera.forward();
+        translation -= cameraMatrix.forward();
     }
     if (Input::keyPressed(Qt::Key_Q))
     {
-        translation -= m_camera.right();
+        translation -= cameraMatrix.right();
     }
     if (Input::keyPressed(Qt::Key_D))
     {
-        translation += m_camera.right();
+        translation += cameraMatrix.right();
     }
     if (Input::keyPressed(Qt::Key_A))
     {
-        translation -= m_camera.up();
+        translation -= cameraMatrix.up();
     }
     if (Input::keyPressed(Qt::Key_E))
     {
-        translation += m_camera.up();
+        translation += cameraMatrix.up();
     }
     if (Input::keyPressed(Qt::Key_L))
     {
-        lumiere.pos.setZ(m_camera.translation().z()) ;
-        lumiere.pos.setY(m_camera.translation().y()) ;
-        lumiere.pos.setX(m_camera.translation().x()) ;
+        light.position.setZ(cameraMatrix.translation().z()) ;
+        light.position.setY(cameraMatrix.translation().y()) ;
+        light.position.setX(cameraMatrix.translation().x()) ;
     }
-    m_camera.translate(transSpeed * translation);
+    cameraMatrix.translate(transSpeed * translation);
 
     // Update instance information
     if(autoRotate) {
-        m_transform.rotate(1.0f, QVector3D(0.4f, 0.3f, 0.3f));
+        transformMatrix.rotate(1.0f, QVector3D(0.4f, 0.3f, 0.3f));
     }
 
     // Schedule a redraw
@@ -259,7 +259,7 @@ void DisplayWidget::updateGem(GLfloat topHeight, GLfloat bottomHeight, GLfloat t
     gem->initGem(topHeight, bottomHeight, topRadius, middleRadius, bottomRadius, topNbPoints, middleNbPoints,
                  bottomNbPoints, topComplexity, bottomComplexity, lengthStretchingPercent, widthStretchingPercent, color);
 
-    gem->initializeBuffer(shaderProgram, &m_transform, false);
+    gem->initializeBuffer(shaderProgram, &transformMatrix, false);
 
 }
 

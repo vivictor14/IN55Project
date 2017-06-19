@@ -42,8 +42,9 @@ private:
 
     void calculateInnerMiddleRadius();
     void initVertices(QVector3D color);
-    void mapping();
     Vertex *initFaceVertices(bool counterClockWise, GLfloat height, GLfloat radius, GLint nbPoints, GLint Complexity, QVector3D color);
+    void mapping();
+    void faceMapping(int startPosition, Vertex *vertices, GLint nbPoints, GLint complexity, bool clockwise);
     void tableMapping(VerticesMapping *mapping, Vertex *vertices, GLint nbPoints, GLint complexity);
     void pavilionMapping(VerticesMapping *mapping, Vertex *vertices, GLint complexity, bool clockWise);
     void starMapping(VerticesMapping *mapping, Vertex *vertices, GLint nbPoints, GLint complexity);
@@ -57,13 +58,13 @@ public:
         GLint topNbPoints, GLint middleNbPoints, GLint bottomNbPoints, GLint topComplexity, GLint bottomComplexity,
         GLint lengthStretchingPercent, GLint widthStretchingPercent, QColor color);
     ~Gem();
-    void initializeBuffer(QOpenGLShaderProgram *shaderProgram, Transform3D *m_transform, bool init);
+    void initializeBuffer(QOpenGLShaderProgram *shaderProgram, Transform3D *transformMatrix, bool init);
 
 
     void initGem(GLfloat topHeight, GLfloat bottomHeight, GLfloat topRadius, GLfloat middleRadius, GLfloat bottomRadius,
                  GLint topNbPoints, GLint middleNbPoints, GLint bottomNbPoints, GLint topComplexity, GLint bottomComplexity,
                  GLint lengthStretchingPercent, GLint widthStretchingPercent, QColor color);
-    void drawShape(QOpenGLShaderProgram *shaderProgram, int u_modelToWorld, Transform3D m_transform,unsigned int cubemapTexture);
+    void drawShape(QOpenGLShaderProgram *shaderProgram, int modelToWorldLocation, Transform3D transformMatrix,unsigned int cubeMapTexture);
 
     // Accessors
     GLfloat getTopHeight() const;
