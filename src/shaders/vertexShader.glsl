@@ -17,69 +17,50 @@ uniform mat4 worldToCamera;
 uniform mat4 cameraToView;
 uniform ligth lumiere;
 
-out vec4 amb;
-out vec4 diff;
-out vec4 spec;
+out vec4 amb; // ambient component
+out vec4 diff; // diffuse component
+out vec4 spec; // specular component
 out vec3 ColorT;
 
-out vec3 Position;
-out vec3 Normale;
+out vec3 Position;  // position of the point in the correct space
+out vec3 Normale; // normalized normal
 
-out float atte;
+out float attenuation; // attenuation factor
 
-
-void DirectionalLight(in vec3 V, in vec3 normal,inout vec4 ambient,inout vec4 diffuse, inout vec4 specular);
+// method which calculate all the component
 void PointLight(in vec3 V, in vec3 sp, in vec3 normal, inout vec4 ambient, inout vec4 diffuse, inout vec4 specular );
 
 void main()
 {
 
+    // matrice permettant d'avoir une normale cohérente lors d'un changements de repère
     mat3 glNormalMatrix = transpose(inverse(mat3(modelToWorld)));
+
     vec3 sp = vec3(modelToWorld * vec4(position,1));
     vec3 V = -normalize( sp );
     vec3 unit_normal = normalize( glNormalMatrix*normal.xyz );
+
+    // The ambient component have a default value because of the skybox which have a sun (and so a constant light)
     amb = vec4(0.2,0.2,0.2,1.0);  diff = vec4(0.0);  spec = vec4(0.0);
 
-    //DirectionalLight(V, unit_normal, amb, diff, spec);
     PointLight(V, sp, unit_normal, amb, diff, spec);
-
-    gl_Position =  cameraToView * worldToCamera * modelToWorld * vec4(position,1);
 
     ColorT = color;
     Normale = unit_normal;
     Position = vec3(modelToWorld * vec4(position,1));
+
+    gl_Position =  cameraToView * worldToCamera * modelToWorld * vec4(position,1);
+
 }
 
-
-
-void DirectionalLight(in vec3 V, in vec3 normal,inout vec4 ambient,inout vec4 diffuse, inout vec4 specular)
-{
-    float nDotLi;  // normal . light direction
-    float nDotH;   // normal . light half vector
-    float pf;// power factor
-
-    vec3 halfway_vector = normalize(lumiere.pos.xyz + V);
-    nDotLi = max(0.0, dot(normal, normalize(lumiere.pos.xyz)));
-    if (nDotLi == 0.0)
-        pf = 0.0;
-    else
-    {
-        nDotH = max(0.0, dot(normal, halfway_vector));
-        pf = pow(nDotH, 4*0.88);
-    }
-    ambient += lumiere.ambiant;
-    diffuse += lumiere.diffuse * nDotLi;
-    specular += lumiere.specular *pf;
-}
 
 void PointLight(in vec3 V, in vec3 sp, in vec3 normal, inout vec4 ambient, inout vec4 diffuse, inout vec4 specular )
 {
-    float nDotLi; // produit scalaire entre normal et direction de la lumière
-    float nDotH; // produit scalaire entre normal et le halfway_vector
+    float nDotLi; // dot product between normal and light direction
+    float nDotH; // dot product between normal and halfway_vector
     float pf; // power factor
-    float attenuation;
-    float d;  // la distance entre la surface et la position de la lumière
-    vec3 L;  // la direction entre la surface et la position de la lumière
+    float d;  // distance between the surface and the light position
+    vec3 L;  // direction between the surface and the light position
     vec3 halfway_vector;  // direction of maximum highlights
 
     L = lumiere.pos.xyz - sp;
@@ -89,8 +70,10 @@ void PointLight(in vec3 V, in vec3 sp, in vec3 normal, inout vec4 ambient, inout
     nDotLi = max(0.0, dot(normal, L));
     nDotH = max(0.0, dot(normal, halfway_vector));
 
+    // 0.06 was found thanks to multiple test
     attenuation = 1.0 / (0.06*d);
 
+    // light is perpendicular to the face, diffuse component is at his maximum
     if (nDotLi == 0.0)
         pf = 0.0;
     else
@@ -99,5 +82,4 @@ void PointLight(in vec3 V, in vec3 sp, in vec3 normal, inout vec4 ambient, inout
     ambient += lumiere.ambiant ;
     diffuse += lumiere.diffuse * nDotLi ;
     specular += lumiere.specular * pf;
-    atte = attenuation;
 }

@@ -7,5 +7,6 @@ uniform samplerCube skybox;
 
 void main()
 {
+    // set the fragment texture
     fColor = texture(skybox, TexCoord);
 }

@@ -1,33 +1,34 @@
 #version 330
 
-in vec4 amb;
-in vec4 diff;
-in vec4 spec;
+in vec4 amb; // Ambient component
+in vec4 diff; // Diffuse component
+in vec4 spec; // Specular component
 in vec3 Position;
 in vec3 ColorT;
-in float atte;
+in float attenuation; // attenuation factor (produce more shadow the further the light is)
+in vec3 Normale; // face's normal
 
-in vec3 Normale;
-
-uniform samplerCube skybox;
-uniform vec3 cameraPos;
+uniform samplerCube skybox; // skybox's texture
+uniform vec3 cameraPos; // camera position in the correct space
 
 out vec4 fColor;
 
 
 void main()
     {
-    vec3 ambient  = vec3(amb)  * vec3(ColorT); //couleur ambiante
-    vec3 diffuse  = vec3(diff) * vec3(ColorT); //couleur diffuse
-    vec3 specular = vec3(spec) * vec3(ColorT); // couleur spéculaire
-    float ratio = 1.00 / 2.42; // ration passage de l'air au diamant
+    vec3 ambient  = vec3(amb)  * vec3(ColorT); // ambient color
+    vec3 diffuse  = vec3(diff) * vec3(ColorT); // diffuse color
+    vec3 specular = vec3(spec) * vec3(ColorT); // specular color
+    float ratio = 1.00 / 2.42; // ratio air/diamond
 
-    vec3 I = normalize(Position - cameraPos);
+    vec3 I = normalize(Position - cameraPos); // direction of the vision's user
 
     vec3 Refraction = refract(I, Normale, ratio);
     vec3 Reflection = reflect(I, Normale);
 
-    fColor = vec4(ambient + diffuse*atte + specular*atte + texture(skybox, Reflection).rgb*atte+ texture(skybox, Refraction).rgb*atte, 1.0);
+    // The color is equal to the sum of all the intensity, the ambient is not affect by the attenuation because
+    // it is not related to the light's distance
+    fColor = vec4(ambient + diffuse*attenuation + specular*attenuation + texture(skybox, Reflection).rgb*attenuation+ texture(skybox, Refraction).rgb*attenuation, 1.0);
 
 }
 

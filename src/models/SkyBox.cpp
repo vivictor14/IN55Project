@@ -5,6 +5,9 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
+/**
+ * Default constructor
+ */
 SkyBox::SkyBox() {
 
     mapping = new VerticesMapping[1];
@@ -14,7 +17,7 @@ SkyBox::SkyBox() {
     mapping[0].vertices = new Vertex[mapping->length];
 
     static const GLfloat vertices[] = {
-            // positions
+            // positions of all the faces
             -1.0f,  1.0f, -1.0f,
             -1.0f, -1.0f, -1.0f,
             1.0f, -1.0f, -1.0f,
@@ -66,6 +69,9 @@ SkyBox::SkyBox() {
 
 }
 
+/**
+ * Destructor
+ */
 SkyBox::~SkyBox() {
 
     vbo[0].destroy();
@@ -73,6 +79,9 @@ SkyBox::~SkyBox() {
 
 }
 
+/*
+ *  Init the shader component such as vertices's positions and texture
+ */
 void SkyBox::initializeBuffer(QOpenGLShaderProgram *shaderProgram) {
 
     initializeOpenGLFunctions();
@@ -89,13 +98,14 @@ void SkyBox::initializeBuffer(QOpenGLShaderProgram *shaderProgram) {
 
     cubemapTexture = loadCubemap(faces);
 
-
+    // bind the two buffer
     shaderProgram->bind();
     vbo = new QOpenGLBuffer[1];
     vao = new QOpenGLVertexArrayObject[1];
 
     vbo[0].create();
 
+    // Set the buffer to static and set the vertices
     vbo[0].bind();
     vbo[0].setUsagePattern(QOpenGLBuffer::StaticDraw);
     vbo[0].allocate(mapping[0].vertices, mapping[0].length * sizeof(Vertex));
@@ -103,6 +113,7 @@ void SkyBox::initializeBuffer(QOpenGLShaderProgram *shaderProgram) {
     vao[0].create();
 
 
+    // Set where to find the good attribute for a point
     vao[0].bind();
     shaderProgram->enableAttributeArray(0);
     shaderProgram->setAttributeBuffer(0, GL_FLOAT, Vertex::positionOffset(), Vertex::PositionTupleSize,
@@ -116,9 +127,13 @@ void SkyBox::initializeBuffer(QOpenGLShaderProgram *shaderProgram) {
 
 }
 
+/*
+ * Draw the cube
+ */
 void SkyBox::drawShape() {
 
     vao[0].bind();
+    // bind the texture
     glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
     glDepthMask(GL_TRUE);
     glDrawArrays(mapping[0].mode, 0, mapping[0].length);
@@ -126,18 +141,31 @@ void SkyBox::drawShape() {
 
 }
 
+/*
+ * Get the skybox's texture
+ */
 unsigned int SkyBox::getTexture(){
     return cubemapTexture;
 }
 
-
+/*
+ * Create a texture thanks to 6 images
+ *
+ * @param faces contains the path of the 6 images
+ *
+ * @return the ID of the texture
+ */
 unsigned int SkyBox::loadCubemap(std::vector<std::string> faces) {
+
     unsigned int textureID;
+    // create the texture's ID and bind it as a Cubemap
     glGenTextures(1, &textureID);
     glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
     int width, height, nrChannels;
     for (unsigned int i = 0; i < 6; i++) {
 
+        // Load the image and create a 2D image for a face
+        // In order : left, right, top, bottom, back, front
         unsigned char *data = stbi_load(faces[i].c_str(), &width, &height, &nrChannels, 0);
         if (data) {
             glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
