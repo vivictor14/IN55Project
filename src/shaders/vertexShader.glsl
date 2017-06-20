@@ -1,9 +1,9 @@
 #version 330
 
-struct ligth
+struct lumiere
 {
-  vec4 pos;
-  vec4 ambiant;
+  vec4 position;
+  vec4 ambient;
   vec4 diffuse;
   vec4 specular;
 };
@@ -15,7 +15,7 @@ layout(location = 2) in vec3 normal;
 uniform mat4 modelToWorld;
 uniform mat4 worldToCamera;
 uniform mat4 cameraToView;
-uniform ligth lumiere;
+uniform lumiere light;
 
 out vec4 amb; // ambient component
 out vec4 diff; // diffuse component
@@ -63,7 +63,7 @@ void PointLight(in vec3 V, in vec3 sp, in vec3 normal, inout vec4 ambient, inout
     vec3 L;  // direction between the surface and the light position
     vec3 halfway_vector;  // direction of maximum highlights
 
-    L = lumiere.pos.xyz - sp;
+    L = light.position.xyz - sp;
     d = max(0.0,length( L ));
     L = normalize( L );
     halfway_vector = normalize(L + V);
@@ -79,7 +79,7 @@ void PointLight(in vec3 V, in vec3 sp, in vec3 normal, inout vec4 ambient, inout
     else
         pf = pow(nDotH, 0.88);
 
-    ambient += lumiere.ambiant ;
-    diffuse += lumiere.diffuse * nDotLi ;
-    specular += lumiere.specular * pf;
+    ambient += light.ambient ;
+    diffuse += light.diffuse * nDotLi ;
+    specular += light.specular * pf;
 }

@@ -14,7 +14,7 @@ DisplayWidget::DisplayWidget() {
     cameraMatrix.rotate(-10, 1, 0, 0);
     transformMatrix.translate(0, -5, -35);
     light.position = { 0.0f, 0.0f, 0.0f, 1.0f };
-    light.ambient = { 0.3f, 0.3f, 0.3f, 1.0f };
+    light.ambient = { 0.2f, 0.2f, 0.2f, 1.0f };
     light.specular = { 0.5f, 0.5f, 0.5f, 1.0f };
     light.diffuse = { 0.5f, 0.5f, 0.5f, 1.0f };
 
